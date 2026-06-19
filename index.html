@@ -57,9 +57,7 @@
   }
   .btn-capture:active { transform: scale(0.97); }
   .btn-capture.secondary { background: var(--surface); border: 2px solid var(--surface-light); }
-  .btn-capture.multi {
-    background: var(--surface); border: 2px dashed var(--primary); color: var(--primary);
-  }
+  .btn-capture.multi { background: var(--surface); border: 2px dashed var(--primary); color: var(--primary); }
   .btn-capture .icon { font-size: 22px; }
   .btn-capture .subtitle { font-size: 11px; opacity: 0.8; font-weight: 400; margin-top: 2px; }
   .quality-selector {
@@ -117,6 +115,154 @@
   .tool-btn.primary { background: var(--primary); }
   .tool-btn.success { background: var(--success); }
   .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  /* 🆕 PANTALLA DE FILTROS */
+  .filters-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .filters-preview {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    min-height: 300px;
+  }
+  .filters-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+  }
+  .filters-preview-label {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+  }
+  .filters-controls {
+    background: var(--surface);
+    border-top: 1px solid var(--surface-light);
+    max-height: 55vh;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .filters-section-title {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .presets-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .preset-btn {
+    background: var(--surface-light);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .preset-btn.active {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.2);
+  }
+  .preset-btn .preset-icon {
+    font-size: 20px;
+  }
+  .preset-btn .preset-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .slider-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .slider-value {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+    min-width: 40px;
+    text-align: right;
+  }
+  .slider-input {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--surface-light);
+    border-radius: 3px;
+    outline: none;
+  }
+  .slider-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .slider-input::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    background: var(--primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  .filters-toolbar {
+    background: var(--surface);
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--surface-light);
+  }
+  .filters-toolbar button { flex: 1; padding: 14px; font-size: 14px; }
+  .btn-reset-filters { background: var(--surface-light); color: var(--text); }
+  .btn-apply-filters { background: var(--success); color: white; font-weight: 600; }
+  
   .result-container {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; padding: 16px; gap: 16px; overflow-y: auto;
@@ -163,6 +309,12 @@
   .page-info { flex: 1; min-width: 0; }
   .page-number { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
   .page-meta { font-size: 12px; color: var(--text-dim); }
+  .page-filters {
+    font-size: 10px;
+    color: var(--primary);
+    margin-top: 2px;
+    font-weight: 500;
+  }
   .page-actions { display: flex; flex-direction: column; gap: 6px; }
   .page-btn {
     background: var(--surface-light); border: none; color: var(--text);
@@ -350,10 +502,79 @@
   </div>
 </div>
 
+<!-- 🆕 PANTALLA DE FILTROS -->
+<div id="screen-filters" class="screen">
+  <div class="header">
+    <button class="btn-back" onclick="backFromFilters()">←</button>
+    <h1>Filtros</h1>
+  </div>
+  <div class="filters-container">
+    <div class="filters-preview">
+      <div class="filters-preview-label" id="filtersPreviewLabel">Original</div>
+      <canvas id="filtersPreviewCanvas"></canvas>
+    </div>
+    <div class="filters-controls">
+      <div>
+        <div class="filters-section-title">Presets</div>
+        <div class="presets-grid">
+          <div class="preset-btn active" data-preset="original" onclick="setPreset('original')">
+            <span class="preset-icon">🎨</span>
+            <span class="preset-name">Original</span>
+          </div>
+          <div class="preset-btn" data-preset="bw" onclick="setPreset('bw')">
+            <span class="preset-icon">⬛</span>
+            <span class="preset-name">B/N</span>
+          </div>
+          <div class="preset-btn" data-preset="grayscale" onclick="setPreset('grayscale')">
+            <span class="preset-icon">🔲</span>
+            <span class="preset-name">Grises</span>
+          </div>
+          <div class="preset-btn" data-preset="document" onclick="setPreset('document')">
+            <span class="preset-icon">📄</span>
+            <span class="preset-name">Documento</span>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <div class="filters-section-title">Ajustes manuales</div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <span class="slider-label">☀️ Brillo</span>
+            <span class="slider-value" id="brightnessValue">0</span>
+          </div>
+          <input type="range" class="slider-input" id="brightnessSlider" 
+                 min="-100" max="100" value="0" oninput="updateFilter('brightness', this.value)">
+        </div>
+        <div class="slider-group" style="margin-top:12px">
+          <div class="slider-header">
+            <span class="slider-label">🌓 Contraste</span>
+            <span class="slider-value" id="contrastValue">0</span>
+          </div>
+          <input type="range" class="slider-input" id="contrastSlider" 
+                 min="-100" max="100" value="0" oninput="updateFilter('contrast', this.value)">
+        </div>
+        <div class="slider-group" style="margin-top:12px">
+          <div class="slider-header">
+            <span class="slider-label">🔍 Nitidez</span>
+            <span class="slider-value" id="sharpnessValue">0</span>
+          </div>
+          <input type="range" class="slider-input" id="sharpnessSlider" 
+                 min="0" max="100" value="0" oninput="updateFilter('sharpness', this.value)">
+        </div>
+      </div>
+    </div>
+    <div class="filters-toolbar">
+      <button class="tool-btn btn-reset-filters" onclick="resetFilters()">🔄 Restaurar</button>
+      <button class="tool-btn btn-apply-filters" onclick="applyFilters()">✅ Aplicar filtros</button>
+    </div>
+  </div>
+</div>
+
 <div id="screen-result" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backFromResult()">←</button>
-    <h1>Página Corregida</h1>
+    <h1>Página Final</h1>
     <span class="page-count" id="resultPageCount">1</span>
   </div>
   <div class="result-container">
@@ -362,6 +583,7 @@
     <div class="result-actions">
       <button class="tool-btn btn-add" onclick="addAnotherPage()">📄 Agregar otra página</button>
       <button class="tool-btn btn-finish" onclick="finishDocument()">✅ Terminar documento</button>
+      <button class="tool-btn" onclick="editFiltersFromResult()">🎨 Ajustar filtros</button>
       <button class="tool-btn btn-download-single" onclick="downloadSinglePage()">💾 Descargar solo esta página</button>
     </div>
   </div>
@@ -545,6 +767,188 @@ const Homography = {
 };
 
 /* =========================================================
+   🆕 MOTOR DE FILTROS
+   ========================================================= */
+const Filters = {
+  // Aplicar todos los filtros en orden sobre un ImageData
+  applyAll(imageData, config) {
+    let data = new Uint8ClampedArray(imageData.data);
+    const w = imageData.width;
+    const h = imageData.height;
+    
+    // 1. Preset (B/N, Grises, Documento)
+    if (config.preset === 'bw') {
+      data = this.applyBW(data, w, h);
+    } else if (config.preset === 'grayscale') {
+      data = this.applyGrayscale(data, w, h);
+    } else if (config.preset === 'document') {
+      data = this.applyDocument(data, w, h);
+    }
+    
+    // 2. Brillo
+    if (config.brightness !== 0) {
+      data = this.applyBrightness(data, config.brightness);
+    }
+    
+    // 3. Contraste
+    if (config.contrast !== 0) {
+      data = this.applyContrast(data, config.contrast);
+    }
+    
+    // 4. Nitidez
+    if (config.sharpness > 0) {
+      data = this.applySharpness(data, w, h, config.sharpness);
+    }
+    
+    return new ImageData(data, w, h);
+  },
+  
+  // Blanco y negro con umbral (alto contraste)
+  applyBW(data, w, h) {
+    const threshold = 128;
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      const val = gray >= threshold ? 255 : 0;
+      data[i] = data[i+1] = data[i+2] = val;
+    }
+    return data;
+  },
+  
+  // Escala de grises
+  applyGrayscale(data, w, h) {
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      data[i] = data[i+1] = data[i+2] = gray;
+    }
+    return data;
+  },
+  
+  // Modo documento: umbral adaptativo + aclarar fondo
+  applyDocument(data, w, h) {
+    // Primero escala de grises
+    const gray = new Uint8ClampedArray(data.length);
+    for (let i = 0; i < data.length; i += 4) {
+      const g = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
+      gray[i] = gray[i+1] = gray[i+2] = g;
+      gray[i+3] = 255;
+    }
+    
+    // Calcular umbral local (bloque de 15x15)
+    const blockSize = 15;
+    const C = 10; // constante de ajuste
+    
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let sum = 0, count = 0;
+        const y0 = Math.max(0, y - blockSize);
+        const y1 = Math.min(h - 1, y + blockSize);
+        const x0 = Math.max(0, x - blockSize);
+        const x1 = Math.min(w - 1, x + blockSize);
+        
+        for (let by = y0; by <= y1; by++) {
+          for (let bx = x0; bx <= x1; bx++) {
+            sum += gray[(by * w + bx) * 4];
+            count++;
+          }
+        }
+        
+        const mean = sum / count;
+        const idx = (y * w + x) * 4;
+        const pixel = gray[idx];
+        
+        // Si el píxel es significativamente más oscuro que el promedio → texto
+        const val = pixel < (mean - C) ? 0 : 255;
+        data[idx] = data[idx+1] = data[idx+2] = val;
+      }
+    }
+    return data;
+  },
+  
+  // Brillo: sumar/restar valor a cada canal
+  applyBrightness(data, amount) {
+    // amount: -100 a 100 → mapear a -128 a 128
+    const adj = (amount / 100) * 128;
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = Math.max(0, Math.min(255, data[i] + adj));
+      data[i+1] = Math.max(0, Math.min(255, data[i+1] + adj));
+      data[i+2] = Math.max(0, Math.min(255, data[i+2] + adj));
+    }
+    return data;
+  },
+  
+  // Contraste: factor multiplicativo
+  applyContrast(data, amount) {
+    // amount: -100 a 100 → factor 0.5 a 2.0
+    const factor = (amount + 100) / 100;
+    const intercept = 128 * (1 - factor);
+    for (let i = 0; i < data.length; i += 4) {
+      data[i] = Math.max(0, Math.min(255, data[i] * factor + intercept));
+      data[i+1] = Math.max(0, Math.min(255, data[i+1] * factor + intercept));
+      data[i+2] = Math.max(0, Math.min(255, data[i+2] * factor + intercept));
+    }
+    return data;
+  },
+  
+  // Nitidez: convolución con kernel de sharpening
+  applySharpness(data, w, h, amount) {
+    // amount: 0 a 100 → intensidad del kernel
+    const strength = amount / 100;
+    
+    // Kernel de sharpening: centro 1+4s, vecinos -s
+    const s = strength;
+    const kernel = [
+      [0, -s, 0],
+      [-s, 1 + 4*s, -s],
+      [0, -s, 0]
+    ];
+    
+    const output = new Uint8ClampedArray(data.length);
+    
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let r = 0, g = 0, b = 0;
+        
+        for (let ky = -1; ky <= 1; ky++) {
+          for (let kx = -1; kx <= 1; kx++) {
+            const ny = Math.max(0, Math.min(h - 1, y + ky));
+            const nx = Math.max(0, Math.min(w - 1, x + kx));
+            const idx = (ny * w + nx) * 4;
+            const weight = kernel[ky + 1][kx + 1];
+            r += data[idx] * weight;
+            g += data[idx + 1] * weight;
+            b += data[idx + 2] * weight;
+          }
+        }
+        
+        const outIdx = (y * w + x) * 4;
+        output[outIdx] = Math.max(0, Math.min(255, r));
+        output[outIdx + 1] = Math.max(0, Math.min(255, g));
+        output[outIdx + 2] = Math.max(0, Math.min(255, b));
+        output[outIdx + 3] = data[outIdx + 3];
+      }
+    }
+    
+    return output;
+  },
+  
+  // Descripción legible de los filtros aplicados
+  describeConfig(config) {
+    const parts = [];
+    const presetNames = {
+      original: 'Original',
+      bw: 'B/N',
+      grayscale: 'Grises',
+      document: 'Documento'
+    };
+    if (config.preset !== 'original') parts.push(presetNames[config.preset]);
+    if (config.brightness !== 0) parts.push(`Brillo ${config.brightness > 0 ? '+' : ''}${config.brightness}`);
+    if (config.contrast !== 0) parts.push(`Contraste ${config.contrast > 0 ? '+' : ''}${config.contrast}`);
+    if (config.sharpness > 0) parts.push(`Nitidez ${config.sharpness}`);
+    return parts.length > 0 ? parts.join(' · ') : 'Sin filtros';
+  }
+};
+
+/* =========================================================
    CONFIGURACIÓN DE CALIDAD
    ========================================================= */
 const QUALITY_PRESETS = {
@@ -594,7 +998,18 @@ const state = {
   pages: [],
   editingPageId: null,
   pendingImages: [],
-  pendingIndex: 0
+  pendingIndex: 0,
+  // 🆕 Estado de filtros
+  correctedImageData: null,  // ImageData de la imagen corregida (sin filtros)
+  correctedDims: { w: 0, h: 0 },
+  currentFilterConfig: {
+    preset: 'original',
+    brightness: 0,
+    contrast: 0,
+    sharpness: 0
+  },
+  filterPreviewImage: null,  // HTMLImageElement pequeña para preview rápido
+  filterPreviewTimer: null
 };
 
 const canvas = document.getElementById('editorCanvas');
@@ -615,7 +1030,16 @@ function cancelEditor() {
   if (state.pages.length > 0) { showScreen('screen-gallery'); renderGallery(); }
   else goHome();
 }
-function backFromResult() { showScreen('screen-editor'); drawEditor(); }
+function backFromResult() { 
+  // Volver a filtros (no al editor) para poder reajustar
+  showScreen('screen-filters'); 
+  renderFiltersPreview();
+}
+function backFromFilters() {
+  // Volver al editor
+  showScreen('screen-editor');
+  drawEditor();
+}
 function backFromGallery() {
   if (state.pages.length > 0) {
     showConfirm('¿Descartar documento?', `Tienes ${state.pages.length} página(s). Si sales, se perderán.`, 'Descartar',
@@ -807,6 +1231,7 @@ canvas.addEventListener('touchend', onPointerUp);
 
 /* =========================================================
    CORRECCIÓN DE PERSPECTIVA
+   (Ahora va a pantalla de filtros en lugar de resultado)
    ========================================================= */
 async function applyPerspective() {
   const t0 = performance.now();
@@ -850,54 +1275,22 @@ async function applyPerspective() {
     await new Promise(r => setTimeout(r, 30));
     const dstData = Homography.warpPerspective(srcImageData.data, srcCanvas.width, srcCanvas.height, H, dstWidth, dstHeight);
     if (!dstData) throw new Error('Error en la transformación');
-    showLoading('Generando imagen...', 90);
-    await new Promise(r => setTimeout(r, 30));
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = dstWidth; tempCanvas.height = dstHeight;
-    const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.putImageData(new ImageData(dstData, dstWidth, dstHeight), 0, 0);
-    tempCanvas.toBlob((blob) => {
-      state.currentPageBlob = blob;
-      state.currentPageDims = { w: dstWidth, h: dstHeight };
-      const thumbCanvas = document.createElement('canvas');
-      const thumbSize = 150;
-      const ratio = Math.min(thumbSize / dstWidth, thumbSize / dstHeight);
-      thumbCanvas.width = dstWidth * ratio; thumbCanvas.height = dstHeight * ratio;
-      thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-      const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
-      if (state.editingPageId !== null) {
-        const idx = state.pages.findIndex(p => p.id === state.editingPageId);
-        if (idx >= 0) {
-          URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
-          state.pages[idx] = { id: state.editingPageId, blob, width: dstWidth, height: dstHeight, thumbnailUrl };
-        }
-        state.editingPageId = null;
-      } else {
-        state.currentPageData = { id: Date.now() + Math.random(), blob, width: dstWidth, height: dstHeight, thumbnailUrl };
-      }
-      const url = URL.createObjectURL(blob);
-      document.getElementById('resultImage').src = url;
-      document.getElementById('resultPageCount').textContent = state.pages.length + 1;
-      const resultKB = Math.round(blob.size / 1024);
-      const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
-      document.getElementById('resultInfo').innerHTML = `
-        <div><strong>Dimensiones:</strong> ${dstWidth} × ${dstHeight} px</div>
-        <div><strong>Tamaño:</strong> ${resultKB} KB</div>
-        <div><strong>Tiempo:</strong> ${elapsed}s ⚡</div>
-        <div><strong>Calidad:</strong> ${quality.label}</div>
-        <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
-      `;
-      hideLoading();
-      if (state.pendingImages.length > 0) {
-        if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
-        state.pendingIndex++;
-        showToast(`Página ${state.pendingIndex} procesada en ${elapsed}s`, 'success');
-        loadNextPendingImage();
-      } else {
-        showScreen('screen-result');
-        showToast(`✅ Listo en ${elapsed}s`, 'success');
-      }
-    }, 'image/jpeg', quality.jpegQuality);
+    
+    // 🆕 Guardar ImageData corregida para filtros
+    state.correctedImageData = new ImageData(new Uint8ClampedArray(dstData), dstWidth, dstHeight);
+    state.correctedDims = { w: dstWidth, h: dstHeight };
+    
+    // Resetear filtros
+    resetFilterConfig();
+    
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+    hideLoading();
+    
+    // 🆕 Ir a pantalla de filtros
+    showScreen('screen-filters');
+    await initFiltersScreen();
+    showToast(`✅ Corregido en ${elapsed}s`, 'success');
+    
   } catch (err) {
     console.error(err);
     hideLoading();
@@ -920,48 +1313,305 @@ async function skipCorrection() {
   }
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = newW; tempCanvas.height = newH;
-  tempCanvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
-  tempCanvas.toBlob((blob) => {
-    state.currentPageBlob = blob;
-    state.currentPageDims = { w: newW, h: newH };
-    const thumbCanvas = document.createElement('canvas');
-    const thumbSize = 150;
-    const ratio = Math.min(thumbSize / newW, thumbSize / newH);
-    thumbCanvas.width = newW * ratio; thumbCanvas.height = newH * ratio;
-    thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-    const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
-    if (state.editingPageId !== null) {
-      const idx = state.pages.findIndex(p => p.id === state.editingPageId);
-      if (idx >= 0) {
-        URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
-        state.pages[idx] = { id: state.editingPageId, blob, width: newW, height: newH, thumbnailUrl };
+  const tctx = tempCanvas.getContext('2d');
+  tctx.drawImage(img, 0, 0, newW, newH);
+  const imageData = tctx.getImageData(0, 0, newW, newH);
+  
+  // 🆕 Guardar ImageData para filtros
+  state.correctedImageData = imageData;
+  state.correctedDims = { w: newW, h: newH };
+  
+  resetFilterConfig();
+  
+  const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+  hideLoading();
+  
+  showScreen('screen-filters');
+  await initFiltersScreen();
+  showToast(`✅ Listo en ${elapsed}s`, 'success');
+}
+
+/* =========================================================
+   🆕 PANTALLA DE FILTROS
+   ========================================================= */
+async function initFiltersScreen() {
+  // Crear imagen pequeña para preview rápido
+  const maxPreviewDim = 400;
+  const { w, h } = state.correctedDims;
+  const maxDim = Math.max(w, h);
+  let previewW = w, previewH = h;
+  if (maxDim > maxPreviewDim) {
+    const scale = maxPreviewDim / maxDim;
+    previewW = Math.round(w * scale);
+    previewH = Math.round(h * scale);
+  }
+  
+  const previewCanvas = document.createElement('canvas');
+  previewCanvas.width = previewW;
+  previewCanvas.height = previewH;
+  const pctx = previewCanvas.getContext('2d');
+  
+  // Escalar ImageData al tamaño de preview
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = w;
+  tempCanvas.height = h;
+  tempCanvas.getContext('2d').putImageData(state.correctedImageData, 0, 0);
+  pctx.drawImage(tempCanvas, 0, 0, previewW, previewH);
+  
+  state.filterPreviewImage = previewCanvas;
+  
+  // Resetear sliders
+  document.getElementById('brightnessSlider').value = 0;
+  document.getElementById('contrastSlider').value = 0;
+  document.getElementById('sharpnessSlider').value = 0;
+  document.getElementById('brightnessValue').textContent = '0';
+  document.getElementById('contrastValue').textContent = '0';
+  document.getElementById('sharpnessValue').textContent = '0';
+  
+  // Resetear preset
+  document.querySelectorAll('.preset-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.preset === 'original');
+  });
+  
+  renderFiltersPreview();
+}
+
+function resetFilterConfig() {
+  state.currentFilterConfig = {
+    preset: 'original',
+    brightness: 0,
+    contrast: 0,
+    sharpness: 0
+  };
+}
+
+function setPreset(preset) {
+  state.currentFilterConfig.preset = preset;
+  document.querySelectorAll('.preset-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.preset === preset);
+  });
+  scheduleFilterPreview();
+}
+
+function updateFilter(name, value) {
+  value = parseInt(value);
+  state.currentFilterConfig[name] = value;
+  document.getElementById(name + 'Value').textContent = value;
+  scheduleFilterPreview();
+}
+
+// Throttle: esperar 100ms antes de renderizar para no saturar
+function scheduleFilterPreview() {
+  if (state.filterPreviewTimer) clearTimeout(state.filterPreviewTimer);
+  state.filterPreviewTimer = setTimeout(() => {
+    renderFiltersPreview();
+  }, 80);
+}
+
+function renderFiltersPreview() {
+  if (!state.filterPreviewImage) return;
+  
+  const previewCanvas = document.getElementById('filtersPreviewCanvas');
+  const pctx = previewCanvas.getContext('2d');
+  const w = state.filterPreviewImage.width;
+  const h = state.filterPreviewImage.height;
+  
+  previewCanvas.width = w;
+  previewCanvas.height = h;
+  
+  // Obtener ImageData de la imagen de preview
+  pctx.drawImage(state.filterPreviewImage, 0, 0);
+  const imageData = pctx.getImageData(0, 0, w, h);
+  
+  // Aplicar filtros
+  const filtered = Filters.applyAll(imageData, state.currentFilterConfig);
+  pctx.putImageData(filtered, 0, 0);
+  
+  // Actualizar label
+  document.getElementById('filtersPreviewLabel').textContent = 
+    Filters.describeConfig(state.currentFilterConfig);
+}
+
+function resetFilters() {
+  resetFilterConfig();
+  document.getElementById('brightnessSlider').value = 0;
+  document.getElementById('contrastSlider').value = 0;
+  document.getElementById('sharpnessSlider').value = 0;
+  document.getElementById('brightnessValue').textContent = '0';
+  document.getElementById('contrastValue').textContent = '0';
+  document.getElementById('sharpnessValue').textContent = '0';
+  document.querySelectorAll('.preset-btn').forEach(el => {
+    el.classList.toggle('active', el.dataset.preset === 'original');
+  });
+  renderFiltersPreview();
+  showToast('Filtros restaurados');
+}
+
+// 🆕 Aplicar filtros y generar blob final
+async function applyFilters() {
+  try {
+    showLoading('Aplicando filtros...', 30);
+    await new Promise(r => setTimeout(r, 30));
+    
+    const { w, h } = state.correctedDims;
+    
+    // Crear canvas con el ImageData corregido (tamaño completo)
+    const fullCanvas = document.createElement('canvas');
+    fullCanvas.width = w;
+    fullCanvas.height = h;
+    const fctx = fullCanvas.getContext('2d');
+    fctx.putImageData(state.correctedImageData, 0, 0);
+    const fullImageData = fctx.getImageData(0, 0, w, h);
+    
+    showLoading('Procesando filtros...', 60);
+    await new Promise(r => setTimeout(r, 30));
+    
+    // Aplicar filtros en tamaño completo
+    const filtered = Filters.applyAll(fullImageData, state.currentFilterConfig);
+    fctx.putImageData(filtered, 0, 0);
+    
+    showLoading('Generando imagen...', 90);
+    await new Promise(r => setTimeout(r, 30));
+    
+    const quality = QUALITY_PRESETS[currentQuality];
+    fullCanvas.toBlob((blob) => {
+      state.currentPageBlob = blob;
+      state.currentPageDims = { w, h };
+      
+      // Thumbnail
+      const thumbCanvas = document.createElement('canvas');
+      const thumbSize = 150;
+      const ratio = Math.min(thumbSize / w, thumbSize / h);
+      thumbCanvas.width = w * ratio;
+      thumbCanvas.height = h * ratio;
+      thumbCanvas.getContext('2d').drawImage(fullCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+      const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
+      
+      if (state.editingPageId !== null) {
+        const idx = state.pages.findIndex(p => p.id === state.editingPageId);
+        if (idx >= 0) {
+          URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
+          state.pages[idx] = {
+            id: state.editingPageId,
+            blob,
+            width: w,
+            height: h,
+            thumbnailUrl,
+            filters: { ...state.currentFilterConfig }
+          };
+        }
+        state.editingPageId = null;
+      } else {
+        state.currentPageData = {
+          id: Date.now() + Math.random(),
+          blob,
+          width: w,
+          height: h,
+          thumbnailUrl,
+          filters: { ...state.currentFilterConfig }
+        };
       }
-      state.editingPageId = null;
-    } else {
-      state.currentPageData = { id: Date.now() + Math.random(), blob, width: newW, height: newH, thumbnailUrl };
-    }
-    const url = URL.createObjectURL(blob);
-    document.getElementById('resultImage').src = url;
-    document.getElementById('resultPageCount').textContent = state.pages.length + 1;
-    const resultKB = Math.round(blob.size / 1024);
-    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
-    document.getElementById('resultInfo').innerHTML = `
-      <div><strong>Dimensiones:</strong> ${newW} × ${newH} px</div>
-      <div><strong>Tamaño:</strong> ${resultKB} KB</div>
-      <div><strong>Tiempo:</strong> ${elapsed}s ⚡</div>
-      <div><strong>Modo:</strong> Sin corrección</div>
-      <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
-    `;
+      
+      const url = URL.createObjectURL(blob);
+      document.getElementById('resultImage').src = url;
+      document.getElementById('resultPageCount').textContent = state.pages.length + 1;
+      
+      const resultKB = Math.round(blob.size / 1024);
+      const filtersDesc = Filters.describeConfig(state.currentFilterConfig);
+      document.getElementById('resultInfo').innerHTML = `
+        <div><strong>Dimensiones:</strong> ${w} × ${h} px</div>
+        <div><strong>Tamaño:</strong> ${resultKB} KB</div>
+        <div><strong>Filtros:</strong> ${filtersDesc}</div>
+        <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
+      `;
+      
+      hideLoading();
+      
+      // Si hay más imágenes en cola, procesar la siguiente
+      if (state.pendingImages.length > 0) {
+        if (state.currentPageData) {
+          state.pages.push(state.currentPageData);
+          state.currentPageData = null;
+        }
+        state.pendingIndex++;
+        showToast(`Página ${state.pendingIndex} procesada`, 'success');
+        loadNextPendingImage();
+      } else {
+        showScreen('screen-result');
+        showToast('✅ Filtros aplicados', 'success');
+      }
+    }, 'image/jpeg', quality.jpegQuality);
+    
+  } catch (err) {
+    console.error(err);
     hideLoading();
-    if (state.pendingImages.length > 0) {
-      if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
-      state.pendingIndex++;
-      loadNextPendingImage();
-    } else {
-      showScreen('screen-result');
-      showToast(`✅ Listo en ${elapsed}s`, 'success');
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+// 🆕 Editar filtros desde resultado
+function editFiltersFromResult() {
+  // Necesitamos recuperar el ImageData original sin filtros
+  // Si estamos editando una página existente, cargarla
+  if (state.currentPageData) {
+    // La página actual está en currentPageData, necesitamos su blob original
+    // Problema: ya aplicamos filtros. Para re-editar necesitamos la versión sin filtros
+    // Solución: cargar el blob actual como "corregido" y resetear filtros
+    loadBlobAsCorrected(state.currentPageData.blob, () => {
+      resetFilterConfig();
+      showScreen('screen-filters');
+      initFiltersScreen();
+    });
+  } else if (state.editingPageId !== null) {
+    const page = state.pages.find(p => p.id === state.editingPageId);
+    if (page) {
+      loadBlobAsCorrected(page.blob, () => {
+        // Restaurar filtros originales si existen
+        if (page.filters) {
+          state.currentFilterConfig = { ...page.filters };
+          document.getElementById('brightnessSlider').value = page.filters.brightness;
+          document.getElementById('contrastSlider').value = page.filters.contrast;
+          document.getElementById('sharpnessSlider').value = page.filters.sharpness;
+          document.getElementById('brightnessValue').textContent = page.filters.brightness;
+          document.getElementById('contrastValue').textContent = page.filters.contrast;
+          document.getElementById('sharpnessValue').textContent = page.filters.sharpness;
+          document.querySelectorAll('.preset-btn').forEach(el => {
+            el.classList.toggle('active', el.dataset.preset === page.filters.preset);
+          });
+        } else {
+          resetFilterConfig();
+        }
+        showScreen('screen-filters');
+        initFiltersScreen();
+      });
     }
-  }, 'image/jpeg', quality.jpegQuality);
+  } else {
+    showToast('No hay imagen para editar', 'warning');
+  }
+}
+
+function loadBlobAsCorrected(blob, callback) {
+  showLoading('Cargando imagen...');
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    state.correctedImageData = ctx.getImageData(0, 0, img.width, img.height);
+    state.correctedDims = { w: img.width, h: img.height };
+    URL.revokeObjectURL(url);
+    hideLoading();
+    callback();
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    hideLoading();
+    showToast('Error al cargar', 'error');
+  };
+  img.src = url;
 }
 
 /* =========================================================
@@ -1005,19 +1655,23 @@ function renderGallery() {
     `;
     return;
   }
-  list.innerHTML = state.pages.map((page, idx) => `
+  list.innerHTML = state.pages.map((page, idx) => {
+    const filtersDesc = page.filters ? Filters.describeConfig(page.filters) : 'Sin filtros';
+    return `
     <div class="page-item" data-id="${page.id}">
       <img src="${page.thumbnailUrl}" class="page-thumb" alt="Página ${idx + 1}">
       <div class="page-info">
         <div class="page-number">Página ${idx + 1}</div>
         <div class="page-meta">${page.width} × ${page.height} px · ${Math.round(page.blob.size / 1024)} KB</div>
+        <div class="page-filters">🎨 ${filtersDesc}</div>
       </div>
       <div class="page-actions">
         <button class="page-btn" onclick="editPage('${page.id}')" title="Editar">✏️</button>
         <button class="page-btn danger" onclick="deletePage('${page.id}')" title="Eliminar">🗑️</button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
   if (!sortableInstance) {
     sortableInstance = Sortable.create(list, {
       animation: 150,
@@ -1078,34 +1732,27 @@ function clearAllPages() {
 }
 
 /* =========================================================
-   🆕 CONFIGURACIÓN Y GENERACIÓN DE PDF (CON LOS 3 FIXES)
+   CONFIGURACIÓN Y GENERACIÓN DE PDF
    ========================================================= */
-
-// Constantes globales del PDF
 const PDF = {
   A4_WIDTH_MM: 210,
   A4_HEIGHT_MM: 297,
   MARGIN_MM: 10,
   SPACING_MM: 3,
-  get USABLE_WIDTH_MM() { return this.A4_WIDTH_MM - 2 * this.MARGIN_MM; },   // 190
-  get USABLE_HEIGHT_MM() { return this.A4_HEIGHT_MM - 2 * this.MARGIN_MM; } // 277
+  get USABLE_WIDTH_MM() { return this.A4_WIDTH_MM - 2 * this.MARGIN_MM; },
+  get USABLE_HEIGHT_MM() { return this.A4_HEIGHT_MM - 2 * this.MARGIN_MM; }
 };
 
-// 🆕 Función auxiliar: calcular dimensiones de imagen respetando AMBOS límites (contain)
 function calculateImageDimensions(imgWidth, imgHeight, maxW, maxH) {
   const aspectRatio = imgHeight / imgWidth;
   let w, h;
-  
   if (aspectRatio > maxH / maxW) {
-    // Imagen muy vertical → limitar por ALTO
     h = maxH;
     w = maxH / aspectRatio;
   } else {
-    // Imagen horizontal o normal → limitar por ANCHO
     w = maxW;
     h = maxW * aspectRatio;
   }
-  
   return { width: w, height: h };
 }
 
@@ -1122,39 +1769,26 @@ function openPdfConfig() {
   showScreen('screen-pdf-config');
 }
 
-// 🆕 Vista previa actualizada con la nueva lógica de contain
 function updatePdfPreview() {
   const comp = PDF_COMPRESSION[currentPdfCompression];
   let totalOriginalSize = 0;
   let totalEstimatedSize = 0;
   let estimatedSheets = 0;
-  
   let currentY = PDF.MARGIN_MM;
-  
   state.pages.forEach((page, idx) => {
     totalOriginalSize += page.blob.size;
-    
-    // Calcular dimensiones con contain (igual que en el PDF real)
     const dims = calculateImageDimensions(page.width, page.height, PDF.USABLE_WIDTH_MM, PDF.USABLE_HEIGHT_MM);
-    
-    // Si no cabe en la hoja actual, agregar nueva hoja
     if (idx > 0 && currentY + dims.height > PDF.A4_HEIGHT_MM - PDF.MARGIN_MM) {
       estimatedSheets++;
       currentY = PDF.MARGIN_MM;
     }
     currentY += dims.height + PDF.SPACING_MM;
-    
-    // Estimar tamaño comprimido
     const compressionFactor = comp.quality * 0.6;
     const estimatedPageKb = (page.blob.size / 1024) * compressionFactor;
     totalEstimatedSize += estimatedPageKb * 1024;
   });
-  
   if (state.pages.length > 0) estimatedSheets++;
-  
-  // Overhead del PDF
   totalEstimatedSize += 50 * 1024 + state.pages.length * 1024;
-  
   document.getElementById('previewPages').textContent = state.pages.length;
   document.getElementById('previewSheets').textContent = estimatedSheets;
   document.getElementById('previewOriginalSize').textContent = formatBytes(totalOriginalSize);
@@ -1167,80 +1801,46 @@ function formatBytes(bytes) {
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
-// 🆕 FUNCIÓN PRINCIPAL CON LOS 3 FIXES APLICADOS
 async function generateFinalPdf() {
   if (state.pages.length === 0) {
     showToast('No hay páginas para generar', 'warning');
     return;
   }
-  
   try {
     showLoading('Preparando PDF...', 5);
     await new Promise(r => setTimeout(r, 50));
-    
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
-    
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const comp = PDF_COMPRESSION[currentPdfCompression];
     let currentY = PDF.MARGIN_MM;
-    
     for (let i = 0; i < state.pages.length; i++) {
       const page = state.pages[i];
       const progress = Math.round(((i + 1) / state.pages.length) * 90) + 5;
       showLoading(`Procesando página ${i + 1} de ${state.pages.length}...`, progress);
       await new Promise(r => setTimeout(r, 30));
-      
-      // Convertir blob a imagen comprimida
       const imgDataUrl = await blobToCompressedDataUrl(page.blob, comp.quality, comp.maxDim);
       const img = await loadImage(imgDataUrl);
-      
-      // 🔧 FIX #2: Calcular dimensiones respetando AMBOS límites (contain)
       const dims = calculateImageDimensions(img.width, img.height, PDF.USABLE_WIDTH_MM, PDF.USABLE_HEIGHT_MM);
-      
-      // 🔧 FIX #1: Verificar si cabe en la página actual
-      // Para la primera imagen, SIEMPRE cabe porque calculateImageDimensions
-      // garantiza que las dimensiones son <= al área útil
       if (i > 0 && currentY + dims.height > PDF.A4_HEIGHT_MM - PDF.MARGIN_MM) {
         pdf.addPage();
         currentY = PDF.MARGIN_MM;
       }
-      
-      // 🔧 FIX #3: Centrar horizontalmente
       const xOffset = PDF.MARGIN_MM + (PDF.USABLE_WIDTH_MM - dims.width) / 2;
-      
-      // Agregar imagen al PDF
       pdf.addImage(imgDataUrl, 'JPEG', xOffset, currentY, dims.width, dims.height, undefined, 'FAST');
-      
       currentY += dims.height + PDF.SPACING_MM;
     }
-    
     showLoading('Finalizando PDF...', 98);
     await new Promise(r => setTimeout(r, 50));
-    
-    // Nombre del PDF
     let pdfName = document.getElementById('pdfName').value.trim();
     if (!pdfName) pdfName = `Documento_${Date.now()}`;
     pdfName = pdfName.replace(/[^a-z0-9_\-áéíóúñ\s]/gi, '_').replace(/\s+/g, '_') + '.pdf';
-    
-    // Descargar automáticamente
     pdf.save(pdfName);
-    
     hideLoading();
     showToast(`✅ PDF descargado: ${pdfName}`, 'success');
-    
     setTimeout(() => {
-      showConfirm(
-        '¿Nuevo documento?',
-        'El PDF se ha descargado. ¿Deseas empezar un nuevo documento?',
-        'Nuevo documento',
-        () => { clearAllPages(); goHome(); }
-      );
+      showConfirm('¿Nuevo documento?', 'El PDF se ha descargado. ¿Deseas empezar un nuevo documento?',
+        'Nuevo documento', () => { clearAllPages(); goHome(); });
     }, 500);
-    
   } catch (err) {
     console.error(err);
     hideLoading();
