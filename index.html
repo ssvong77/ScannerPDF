@@ -83,7 +83,7 @@
   .capture-buttons {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     width: 100%;
     max-width: 320px;
   }
@@ -91,9 +91,9 @@
     background: var(--primary);
     color: white;
     border: none;
-    padding: 20px;
+    padding: 18px;
     border-radius: 16px;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -107,33 +107,40 @@
     background: var(--surface);
     border: 2px solid var(--surface-light);
   }
-  .btn-capture .icon { font-size: 24px; }
+  .btn-capture.multi {
+    background: var(--surface);
+    border: 2px dashed var(--primary);
+    color: var(--primary);
+  }
+  .btn-capture .icon { font-size: 22px; }
+  .btn-capture .subtitle {
+    font-size: 11px;
+    opacity: 0.8;
+    font-weight: 400;
+    margin-top: 2px;
+  }
   
-  /* 🆕 SELECTOR DE CALIDAD */
   .quality-selector {
     width: 100%;
     max-width: 320px;
     background: var(--surface);
     border-radius: 12px;
-    padding: 16px;
+    padding: 14px;
   }
   .quality-selector label {
     display: block;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-dim);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-weight: 500;
   }
-  .quality-options {
-    display: flex;
-    gap: 8px;
-  }
+  .quality-options { display: flex; gap: 6px; }
   .quality-option {
     flex: 1;
     background: var(--surface-light);
     border: 2px solid transparent;
     border-radius: 10px;
-    padding: 12px 8px;
+    padding: 10px 6px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s;
@@ -142,15 +149,9 @@
     border-color: var(--primary);
     background: rgba(37, 99, 235, 0.2);
   }
-  .quality-option .icon { font-size: 20px; display: block; margin-bottom: 4px; }
-  .quality-option .name { font-size: 12px; font-weight: 600; color: var(--text); }
-  .quality-option .desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-  
-  #cvStatusHome {
-    font-size: 12px;
-    color: var(--text-dim);
-    text-align: center;
-  }
+  .quality-option .icon { font-size: 18px; display: block; margin-bottom: 2px; }
+  .quality-option .name { font-size: 11px; font-weight: 600; color: var(--text); }
+  .quality-option .desc { font-size: 9px; color: var(--text-dim); margin-top: 2px; }
   
   .editor-container {
     flex: 1;
@@ -188,6 +189,18 @@
     z-index: 10;
     backdrop-filter: blur(8px);
   }
+  .editor-counter {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--primary);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 10;
+  }
   .editor-toolbar {
     background: var(--surface);
     padding: 12px;
@@ -200,18 +213,19 @@
     background: var(--surface-light);
     color: var(--text);
     border: none;
-    padding: 12px 16px;
+    padding: 12px 10px;
     border-radius: 10px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     flex: 1;
     justify-content: center;
   }
   .tool-btn.primary { background: var(--primary); }
+  .tool-btn.success { background: var(--success); }
   .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   
   .result-container {
@@ -253,10 +267,10 @@
   
   .gallery-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .gallery-info {
-    padding: 16px 20px;
+    padding: 14px 20px;
     background: var(--surface);
     border-bottom: 1px solid var(--surface-light);
-    font-size: 14px;
+    font-size: 13px;
     color: var(--text-dim);
   }
   .gallery-info strong { color: var(--text); }
@@ -315,8 +329,8 @@
     display: flex;
     gap: 8px;
   }
-  .gallery-footer button { flex: 1; padding: 14px; font-size: 15px; }
-  .btn-add-more { background: var(--surface-light); color: var(--text); }
+  .gallery-footer button { flex: 1; padding: 14px; font-size: 14px; }
+  .btn-add-more { background: var(--success); color: white; font-weight: 600; }
   .btn-generate { background: var(--primary); color: white; font-weight: 600; }
   .gallery-empty {
     flex: 1;
@@ -423,30 +437,30 @@
 </head>
 <body>
 
+<!-- PANTALLA INICIO -->
 <div id="screen-home" class="screen active">
   <div class="home">
     <div class="logo">📄</div>
     <h2>ScanLens</h2>
-    <p>Escanea documentos con corrección de perspectiva profesional</p>
+    <p>Escáner de documentos con corrección de perspectiva</p>
     
-    <!-- 🆕 SELECTOR DE CALIDAD -->
     <div class="quality-selector">
       <label>Calidad de procesamiento:</label>
       <div class="quality-options">
-        <div class="quality-option" data-quality="fast" onclick="setQuality('fast')">
+        <div class="quality-option active" data-quality="fast" onclick="setQuality('fast')">
           <span class="icon">⚡</span>
           <div class="name">Rápido</div>
-          <div class="desc">1-2 seg</div>
+          <div class="desc">600px</div>
         </div>
-        <div class="quality-option active" data-quality="balanced" onclick="setQuality('balanced')">
+        <div class="quality-option" data-quality="balanced" onclick="setQuality('balanced')">
           <span class="icon">⚖️</span>
-          <div class="name">Equilibrado</div>
-          <div class="desc">3-5 seg</div>
+          <div class="name">Normal</div>
+          <div class="desc">1000px</div>
         </div>
         <div class="quality-option" data-quality="high" onclick="setQuality('high')">
           <span class="icon">🎯</span>
           <div class="name">Alta</div>
-          <div class="desc">5-10 seg</div>
+          <div class="desc">1500px</div>
         </div>
       </div>
     </div>
@@ -456,13 +470,21 @@
         <span class="icon">📷</span> Tomar Foto
       </button>
       <button class="btn-capture secondary" onclick="captureFromFile()">
-        <span class="icon">📁</span> Subir Archivo
+        <span class="icon">🖼️</span> Subir 1 imagen
+      </button>
+      <!-- 🆕 Botón de selección múltiple -->
+      <button class="btn-capture multi" onclick="captureMultipleFiles()">
+        <span class="icon">📚</span>
+        <div>
+          <div>Subir varias imágenes</div>
+          <div class="subtitle">Selecciona varias fotos de tu galería</div>
+        </div>
       </button>
     </div>
-    <div id="cvStatusHome">Preparando motor de corrección...</div>
   </div>
 </div>
 
+<!-- PANTALLA EDITOR -->
 <div id="screen-editor" class="screen">
   <div class="header">
     <button class="btn-back" onclick="cancelEditor()">←</button>
@@ -470,18 +492,19 @@
   </div>
   <div class="editor-container">
     <div class="editor-hint">Arrastra los puntos a las esquinas del documento</div>
+    <div class="editor-counter" id="editorCounter"></div>
     <div class="canvas-wrapper">
       <canvas id="editorCanvas"></canvas>
     </div>
     <div class="editor-toolbar">
       <button class="tool-btn" onclick="resetCorners()">🔄 Reset</button>
-      <button class="tool-btn primary" onclick="applyPerspective()" id="btnApply">
-        ✨ Aplicar
-      </button>
+      <button class="tool-btn" onclick="skipCorrection()">⏭️ Sin corrección</button>
+      <button class="tool-btn primary" onclick="applyPerspective()">✨ Aplicar</button>
     </div>
   </div>
 </div>
 
+<!-- PANTALLA RESULTADO -->
 <div id="screen-result" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backFromResult()">←</button>
@@ -505,6 +528,7 @@
   </div>
 </div>
 
+<!-- PANTALLA GALERÍA -->
 <div id="screen-gallery" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backFromGallery()">←</button>
@@ -513,16 +537,17 @@
   </div>
   <div class="gallery-container">
     <div class="gallery-info">
-      <strong>Arrastra</strong> para reordenar las páginas. El orden se mantendrá en el PDF final.
+      <strong>Arrastra</strong> para reordenar. El orden se mantendrá en el PDF.
     </div>
     <div class="gallery-list" id="galleryList"></div>
     <div class="gallery-footer">
-      <button class="tool-btn btn-add-more" onclick="addMorePages()">➕ Agregar</button>
+      <button class="tool-btn btn-add-more" onclick="addMorePages()">➕ Agregar más</button>
       <button class="tool-btn btn-generate" onclick="generatePDF()">📑 Generar PDF A4</button>
     </div>
   </div>
 </div>
 
+<!-- LOADING -->
 <div id="loadingOverlay" class="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loadingText">Procesando...</div>
@@ -542,22 +567,168 @@
   </div>
 </div>
 
+<!-- 🆕 INPUTS: cámara (1 foto), archivo (1 foto), múltiple (varias) -->
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
 <input type="file" id="fileInput" accept="image/*" style="display:none">
+<input type="file" id="multiFileInput" accept="image/*" multiple style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <script>
 /* =========================================================
+   🆕 MOTOR DE HOMOGRAFÍA PROPIO (reemplaza OpenCV.js)
+   Implementación en JavaScript puro, optimizada para velocidad
+   ========================================================= */
+const Homography = {
+  // Resolver sistema lineal 8x8 con eliminación gaussiana
+  solveLinearSystem(A, b) {
+    const n = b.length;
+    const M = A.map((row, i) => [...row, b[i]]);
+    
+    // Eliminación hacia adelante
+    for (let col = 0; col < n; col++) {
+      // Buscar pivote
+      let maxRow = col;
+      for (let row = col + 1; row < n; row++) {
+        if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
+      }
+      [M[col], M[maxRow]] = [M[maxRow], M[col]];
+      
+      if (Math.abs(M[col][col]) < 1e-10) return null;
+      
+      for (let row = col + 1; row < n; row++) {
+        const factor = M[row][col] / M[col][col];
+        for (let j = col; j <= n; j++) {
+          M[row][j] -= factor * M[col][j];
+        }
+      }
+    }
+    
+    // Sustitución hacia atrás
+    const x = new Array(n);
+    for (let row = n - 1; row >= 0; row--) {
+      let sum = M[row][n];
+      for (let j = row + 1; j < n; j++) {
+        sum -= M[row][j] * x[j];
+      }
+      x[row] = sum / M[row][row];
+    }
+    return x;
+  },
+  
+  // Calcular matriz homográfica desde 4 puntos fuente y 4 destino
+  computeHomography(src, dst) {
+    // src y dst son arrays de 4 puntos {x, y}
+    const A = [];
+    const b = [];
+    
+    for (let i = 0; i < 4; i++) {
+      const sx = src[i].x, sy = src[i].y;
+      const dx = dst[i].x, dy = dst[i].y;
+      
+      A.push([sx, sy, 1, 0, 0, 0, -dx*sx, -dx*sy]);
+      b.push(dx);
+      A.push([0, 0, 0, sx, sy, 1, -dy*sx, -dy*sy]);
+      b.push(dy);
+    }
+    
+    const h = this.solveLinearSystem(A, b);
+    if (!h) return null;
+    
+    // Retornar como matriz 3x3
+    return [
+      [h[0], h[1], h[2]],
+      [h[3], h[4], h[5]],
+      [h[6], h[7], 1]
+    ];
+  },
+  
+  // Aplicar transformación de perspectiva
+  warpPerspective(sourceData, srcWidth, srcHeight, H, dstWidth, dstHeight) {
+    // Calcular inversa de H
+    const det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1])
+              - H[0][1] * (H[1][0] * H[2][2] - H[1][2] * H[2][0])
+              + H[0][2] * (H[1][0] * H[2][1] - H[1][1] * H[2][0]);
+    
+    if (Math.abs(det) < 1e-10) return null;
+    
+    const invDet = 1 / det;
+    const Hinv = [
+      [(H[1][1]*H[2][2] - H[1][2]*H[2][1]) * invDet,
+       (H[0][2]*H[2][1] - H[0][1]*H[2][2]) * invDet,
+       (H[0][1]*H[1][2] - H[0][2]*H[1][1]) * invDet],
+      [(H[1][2]*H[2][0] - H[1][0]*H[2][2]) * invDet,
+       (H[0][0]*H[2][2] - H[0][2]*H[2][0]) * invDet,
+       (H[0][2]*H[1][0] - H[0][0]*H[1][2]) * invDet],
+      [(H[1][0]*H[2][1] - H[1][1]*H[2][0]) * invDet,
+       (H[0][1]*H[2][0] - H[0][0]*H[2][1]) * invDet,
+       (H[0][0]*H[1][1] - H[0][1]*H[1][0]) * invDet]
+    ];
+    
+    // Crear buffer de destino
+    const dstData = new Uint8ClampedArray(dstWidth * dstHeight * 4);
+    
+    // Para cada píxel de destino, calcular posición en fuente
+    for (let y = 0; y < dstHeight; y++) {
+      for (let x = 0; x < dstWidth; x++) {
+        // Aplicar homografía inversa
+        const w = Hinv[2][0] * x + Hinv[2][1] * y + Hinv[2][2];
+        const srcX = (Hinv[0][0] * x + Hinv[0][1] * y + Hinv[0][2]) / w;
+        const srcY = (Hinv[1][0] * x + Hinv[1][1] * y + Hinv[1][2]) / w;
+        
+        // Interpolación bilineal
+        const x0 = Math.floor(srcX);
+        const y0 = Math.floor(srcY);
+        const x1 = x0 + 1;
+        const y1 = y0 + 1;
+        
+        if (x0 < 0 || x1 >= srcWidth || y0 < 0 || y1 >= srcHeight) {
+          // Fuera de bounds - dejar transparente
+          const dstIdx = (y * dstWidth + x) * 4;
+          dstData[dstIdx] = 255;
+          dstData[dstIdx + 1] = 255;
+          dstData[dstIdx + 2] = 255;
+          dstData[dstIdx + 3] = 255;
+          continue;
+        }
+        
+        const fx = srcX - x0;
+        const fy = srcY - y0;
+        
+        const idx00 = (y0 * srcWidth + x0) * 4;
+        const idx01 = (y0 * srcWidth + x1) * 4;
+        const idx10 = (y1 * srcWidth + x0) * 4;
+        const idx11 = (y1 * srcWidth + x1) * 4;
+        
+        const dstIdx = (y * dstWidth + x) * 4;
+        
+        for (let c = 0; c < 4; c++) {
+          const v00 = sourceData[idx00 + c];
+          const v01 = sourceData[idx01 + c];
+          const v10 = sourceData[idx10 + c];
+          const v11 = sourceData[idx11 + c];
+          
+          const v0 = v00 * (1 - fx) + v01 * fx;
+          const v1 = v10 * (1 - fx) + v11 * fx;
+          dstData[dstIdx + c] = v0 * (1 - fy) + v1 * fy;
+        }
+      }
+    }
+    
+    return dstData;
+  }
+};
+
+/* =========================================================
    CONFIGURACIÓN DE CALIDAD
    ========================================================= */
 const QUALITY_PRESETS = {
-  fast: { maxDim: 1000, jpegQuality: 0.80, label: 'Rápido (1000px, 80%)' },
-  balanced: { maxDim: 1200, jpegQuality: 0.90, label: 'Equilibrado (1200px, 90%)' },
-  high: { maxDim: 2000, jpegQuality: 0.92, label: 'Alta calidad (2000px, 92%)' }
+  fast: { maxDim: 600, jpegQuality: 0.82, label: 'Rápido (600px)' },
+  balanced: { maxDim: 1000, jpegQuality: 0.88, label: 'Normal (1000px)' },
+  high: { maxDim: 1500, jpegQuality: 0.92, label: 'Alta (1500px)' }
 };
 
-let currentQuality = 'balanced';
+let currentQuality = 'fast';
 
 function setQuality(level) {
   currentQuality = level;
@@ -565,85 +736,10 @@ function setQuality(level) {
     el.classList.toggle('active', el.dataset.quality === level);
   });
   localStorage.setItem('scanlens_quality', level);
-  showToast(`Calidad: ${QUALITY_PRESETS[level].label}`);
 }
 
-// Cargar preferencia guardada
 const savedQuality = localStorage.getItem('scanlens_quality');
-if (savedQuality && QUALITY_PRESETS[savedQuality]) {
-  setQuality(savedQuality);
-}
-
-/* =========================================================
-   OPENCV.JS
-   ========================================================= */
-let cvReady = false;
-let cvLoading = false;
-let cvLoadPromise = null;
-
-function loadOpenCV() {
-  if (cvLoadPromise) return cvLoadPromise;
-  cvLoadPromise = new Promise((resolve, reject) => {
-    if (cvReady) return resolve();
-    if (cvLoading) {
-      const check = setInterval(() => {
-        if (cvReady) { clearInterval(check); resolve(); }
-      }, 100);
-      return;
-    }
-    cvLoading = true;
-    const script = document.createElement('script');
-    script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
-    script.async = true;
-    script.onload = () => {
-      if (window.cv && window.cv.Mat) {
-        const originalCb = window.cv['onRuntimeInitialized'];
-        window.cv['onRuntimeInitialized'] = () => {
-          cvReady = true;
-          updateCvStatus();
-          if (originalCb) originalCb();
-          resolve();
-        };
-        if (window.cv.getBuildInformation) {
-          try {
-            window.cv.getBuildInformation();
-            cvReady = true;
-            updateCvStatus();
-            resolve();
-          } catch(e) {}
-        }
-      }
-    };
-    script.onerror = () => {
-      cvLoading = false;
-      cvLoadPromise = null;
-      reject(new Error('No se pudo cargar OpenCV.js'));
-    };
-    document.head.appendChild(script);
-  });
-  return cvLoadPromise;
-}
-
-function updateCvStatus() {
-  const el = document.getElementById('cvStatusHome');
-  if (!el) return;
-  if (cvReady) {
-    el.innerHTML = '✅ Motor de corrección listo';
-    el.style.color = 'var(--success)';
-  } else if (cvLoading) {
-    el.innerHTML = '⏳ Descargando motor de corrección...';
-    el.style.color = 'var(--warning)';
-  } else {
-    el.innerHTML = '⚙️ Preparando motor de corrección...';
-    el.style.color = 'var(--text-dim)';
-  }
-}
-
-setTimeout(() => {
-  loadOpenCV().catch(err => {
-    console.warn('Precarga OpenCV falló:', err);
-  });
-}, 500);
+if (savedQuality && QUALITY_PRESETS[savedQuality]) setQuality(savedQuality);
 
 /* =========================================================
    ESTADO GLOBAL
@@ -658,7 +754,10 @@ const state = {
   currentPageBlob: null,
   currentPageDims: { w: 0, h: 0 },
   pages: [],
-  editingPageId: null
+  editingPageId: null,
+  // 🆕 Cola de imágenes para procesamiento en lote
+  pendingImages: [],
+  pendingIndex: 0
 };
 
 const canvas = document.getElementById('editorCanvas');
@@ -672,7 +771,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function goHome() { showScreen('screen-home'); updateCvStatus(); }
+function goHome() { showScreen('screen-home'); }
 function cancelEditor() {
   if (state.pages.length > 0) {
     showScreen('screen-gallery');
@@ -703,35 +802,114 @@ function backFromGallery() {
    ========================================================= */
 function captureFromCamera() { document.getElementById('cameraInput').click(); }
 function captureFromFile() { document.getElementById('fileInput').click(); }
+function captureMultipleFiles() { document.getElementById('multiFileInput').click(); }
 
-document.getElementById('cameraInput').addEventListener('change', handleFileSelect);
-document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+document.getElementById('cameraInput').addEventListener('change', (e) => handleFileSelect(e, false));
+document.getElementById('fileInput').addEventListener('change', (e) => handleFileSelect(e, false));
+// 🆕 Manejo de múltiples archivos
+document.getElementById('multiFileInput').addEventListener('change', (e) => handleFileSelect(e, true));
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (state.pages.length >= MAX_PAGES) {
-    showToast(`Límite de ${MAX_PAGES} páginas alcanzado`, 'warning');
+function handleFileSelect(e, isMultiple) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  
+  if (state.pages.length + files.length > MAX_PAGES) {
+    showToast(`Límite de ${MAX_PAGES} páginas`, 'warning');
     e.target.value = '';
     return;
   }
-  showLoading('Cargando imagen...');
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const img = new Image();
-    img.onload = () => {
-      state.originalImage = img;
-      state.editingPageId = null;
-      initCorners();
-      hideLoading();
-      showScreen('screen-editor');
-      drawEditor();
+  
+  if (isMultiple && files.length > 1) {
+    // 🆕 Cargar todas las imágenes en cola
+    showLoading(`Cargando ${files.length} imágenes...`);
+    state.pendingImages = [];
+    state.pendingIndex = 0;
+    
+    let loaded = 0;
+    files.forEach((file, idx) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const img = new Image();
+        img.onload = () => {
+          state.pendingImages[idx] = img;
+          loaded++;
+          document.getElementById('loadingText').textContent = 
+            `Cargando ${loaded}/${files.length} imágenes...`;
+          
+          if (loaded === files.length) {
+            hideLoading();
+            // Empezar con la primera imagen
+            loadNextPendingImage();
+          }
+        };
+        img.onerror = () => {
+          loaded++;
+          if (loaded === files.length) {
+            hideLoading();
+            if (state.pendingImages.length > 0) {
+              loadNextPendingImage();
+            } else {
+              showToast('Error al cargar imágenes', 'error');
+            }
+          }
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  } else {
+    // Flujo normal de 1 imagen
+    showLoading('Cargando imagen...');
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        state.originalImage = img;
+        state.editingPageId = null;
+        state.pendingImages = [];
+        state.pendingIndex = 0;
+        initCorners();
+        hideLoading();
+        showScreen('screen-editor');
+        updateEditorCounter();
+        drawEditor();
+      };
+      img.onerror = () => { hideLoading(); showToast('Error al cargar', 'error'); };
+      img.src = ev.target.result;
     };
-    img.onerror = () => { hideLoading(); showToast('Error al cargar imagen', 'error'); };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(files[0]);
+  }
   e.target.value = '';
+}
+
+// 🆕 Cargar la siguiente imagen pendiente de la cola
+function loadNextPendingImage() {
+  if (state.pendingIndex >= state.pendingImages.length) {
+    // Todas procesadas, ir a galería
+    state.pendingImages = [];
+    state.pendingIndex = 0;
+    showScreen('screen-gallery');
+    renderGallery();
+    showToast(`✅ ${state.pages.length} páginas agregadas`, 'success');
+    return;
+  }
+  
+  state.originalImage = state.pendingImages[state.pendingIndex];
+  state.editingPageId = null;
+  initCorners();
+  showScreen('screen-editor');
+  updateEditorCounter();
+  drawEditor();
+}
+
+function updateEditorCounter() {
+  const counter = document.getElementById('editorCounter');
+  if (state.pendingImages.length > 0) {
+    counter.textContent = `${state.pendingIndex + 1} / ${state.pendingImages.length}`;
+    counter.style.display = 'block';
+  } else {
+    counter.style.display = 'none';
+  }
 }
 
 /* =========================================================
@@ -845,48 +1023,53 @@ canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 canvas.addEventListener('touchend', onPointerUp);
 
 /* =========================================================
-   CORRECCIÓN DE PERSPECTIVA CON CALIDAD AJUSTABLE
+   🆕 CORRECCIÓN DE PERSPECTIVA (SIN OPENCV, JS PURO)
    ========================================================= */
 async function applyPerspective() {
   const t0 = performance.now();
   const quality = QUALITY_PRESETS[currentQuality];
   
   try {
-    if (!cvReady) {
-      showLoading('Cargando motor de corrección...', 10);
-      await loadOpenCV();
-    }
-    showLoading(`Preparando imagen (${quality.label})...`, 30);
+    showLoading('Preparando imagen...', 20);
     await new Promise(r => setTimeout(r, 30));
     
     const img = state.originalImage;
     const corners = state.corners;
     
+    // Redimensionar si es muy grande
     const origW = img.width, origH = img.height;
     const maxDim = Math.max(origW, origH);
     let processScale = 1;
-    let srcForProcess = img;
+    let srcCanvas;
     
     if (maxDim > quality.maxDim) {
       processScale = quality.maxDim / maxDim;
       const newW = Math.round(origW * processScale);
       const newH = Math.round(origH * processScale);
-      const resizeCanvas = document.createElement('canvas');
-      resizeCanvas.width = newW;
-      resizeCanvas.height = newH;
-      const rctx = resizeCanvas.getContext('2d');
-      rctx.drawImage(img, 0, 0, newW, newH);
-      srcForProcess = resizeCanvas;
+      srcCanvas = document.createElement('canvas');
+      srcCanvas.width = newW;
+      srcCanvas.height = newH;
+      srcCanvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
+    } else {
+      srcCanvas = document.createElement('canvas');
+      srcCanvas.width = origW;
+      srcCanvas.height = origH;
+      srcCanvas.getContext('2d').drawImage(img, 0, 0);
     }
+    
+    const srcCtx = srcCanvas.getContext('2d');
+    const srcImageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
     
     showLoading('Corrigiendo perspectiva...', 50);
     await new Promise(r => setTimeout(r, 30));
     
+    // Escalar esquinas
     const scaledCorners = corners.map(c => ({
       x: c.x * processScale,
       y: c.y * processScale
     }));
     
+    // Calcular dimensiones destino
     const widthTop = Math.hypot(scaledCorners[1].x - scaledCorners[0].x, scaledCorners[1].y - scaledCorners[0].y);
     const widthBottom = Math.hypot(scaledCorners[2].x - scaledCorners[3].x, scaledCorners[2].y - scaledCorners[3].y);
     const heightLeft = Math.hypot(scaledCorners[3].x - scaledCorners[0].x, scaledCorners[3].y - scaledCorners[0].y);
@@ -895,38 +1078,51 @@ async function applyPerspective() {
     const dstWidth = Math.round(Math.max(widthTop, widthBottom));
     const dstHeight = Math.round(Math.max(heightLeft, heightRight));
     
-    const srcMat = cv.imread(srcForProcess);
-    const dstMat = new cv.Mat(dstHeight, dstWidth, cv.CV_8UC4);
+    // Calcular homografía (esquinas marcadas → rectángulo)
+    const H = Homography.computeHomography(
+      scaledCorners,
+      [
+        { x: 0, y: 0 },
+        { x: dstWidth, y: 0 },
+        { x: dstWidth, y: dstHeight },
+        { x: 0, y: dstHeight }
+      ]
+    );
     
-    const srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
-      scaledCorners[0].x, scaledCorners[0].y,
-      scaledCorners[1].x, scaledCorners[1].y,
-      scaledCorners[2].x, scaledCorners[2].y,
-      scaledCorners[3].x, scaledCorners[3].y
-    ]);
-    const dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
-      0, 0, dstWidth, 0, dstWidth, dstHeight, 0, dstHeight
-    ]);
+    if (!H) throw new Error('No se pudo calcular la transformación');
     
-    const M = cv.getPerspectiveTransform(srcTri, dstTri);
-    cv.warpPerspective(srcMat, dstMat, M, new cv.Size(dstWidth, dstHeight),
-      cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
-    
-    showLoading('Generando imagen...', 85);
+    showLoading('Aplicando transformación...', 75);
     await new Promise(r => setTimeout(r, 30));
     
+    // Aplicar warp
+    const dstData = Homography.warpPerspective(
+      srcImageData.data,
+      srcCanvas.width,
+      srcCanvas.height,
+      H,
+      dstWidth,
+      dstHeight
+    );
+    
+    if (!dstData) throw new Error('Error en la transformación');
+    
+    showLoading('Generando imagen...', 90);
+    await new Promise(r => setTimeout(r, 30));
+    
+    // Crear canvas con resultado
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = dstWidth;
     tempCanvas.height = dstHeight;
     const tempCtx = tempCanvas.getContext('2d');
-    const imageData = tempCtx.createImageData(dstWidth, dstHeight);
-    imageData.data.set(dstMat.data);
-    tempCtx.putImageData(imageData, 0, 0);
+    const outImageData = new ImageData(dstData, dstWidth, dstHeight);
+    tempCtx.putImageData(outImageData, 0, 0);
     
+    // Convertir a blob JPEG
     tempCanvas.toBlob((blob) => {
       state.currentPageBlob = blob;
       state.currentPageDims = { w: dstWidth, h: dstHeight };
       
+      // Thumbnail
       const thumbCanvas = document.createElement('canvas');
       const thumbSize = 150;
       const ratio = Math.min(thumbSize / dstWidth, thumbSize / dstHeight);
@@ -951,20 +1147,31 @@ async function applyPerspective() {
       document.getElementById('resultPageCount').textContent = state.pages.length + 1;
       
       const resultKB = Math.round(blob.size / 1024);
-      const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
       document.getElementById('resultInfo').innerHTML = `
         <div><strong>Dimensiones:</strong> ${dstWidth} × ${dstHeight} px</div>
         <div><strong>Tamaño:</strong> ${resultKB} KB</div>
-        <div><strong>Tiempo:</strong> ${elapsed}s</div>
+        <div><strong>Tiempo:</strong> ${elapsed}s ⚡</div>
         <div><strong>Calidad:</strong> ${quality.label}</div>
         <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
       `;
       
-      srcMat.delete(); dstMat.delete(); srcTri.delete(); dstTri.delete(); M.delete();
-      
       hideLoading();
-      showScreen('screen-result');
-      showToast(`✅ Listo en ${elapsed}s`, 'success');
+      
+      // 🆕 Si hay más imágenes en cola, procesar la siguiente automáticamente
+      if (state.pendingImages.length > 0) {
+        // Guardar página actual
+        if (state.currentPageData) {
+          state.pages.push(state.currentPageData);
+          state.currentPageData = null;
+        }
+        state.pendingIndex++;
+        showToast(`Página ${state.pendingIndex} procesada en ${elapsed}s`, 'success');
+        loadNextPendingImage();
+      } else {
+        showScreen('screen-result');
+        showToast(`✅ Listo en ${elapsed}s`, 'success');
+      }
     }, 'image/jpeg', quality.jpegQuality);
     
   } catch (err) {
@@ -972,6 +1179,83 @@ async function applyPerspective() {
     hideLoading();
     showToast('Error: ' + err.message, 'error');
   }
+}
+
+// 🆕 Saltar corrección de perspectiva (usar imagen tal cual)
+async function skipCorrection() {
+  const t0 = performance.now();
+  const quality = QUALITY_PRESETS[currentQuality];
+  
+  showLoading('Procesando...', 30);
+  await new Promise(r => setTimeout(r, 30));
+  
+  const img = state.originalImage;
+  const origW = img.width, origH = img.height;
+  const maxDim = Math.max(origW, origH);
+  let newW = origW, newH = origH;
+  
+  if (maxDim > quality.maxDim) {
+    const scale = quality.maxDim / maxDim;
+    newW = Math.round(origW * scale);
+    newH = Math.round(origH * scale);
+  }
+  
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = newW;
+  tempCanvas.height = newH;
+  tempCanvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
+  
+  tempCanvas.toBlob((blob) => {
+    state.currentPageBlob = blob;
+    state.currentPageDims = { w: newW, h: newH };
+    
+    const thumbCanvas = document.createElement('canvas');
+    const thumbSize = 150;
+    const ratio = Math.min(thumbSize / newW, thumbSize / newH);
+    thumbCanvas.width = newW * ratio;
+    thumbCanvas.height = newH * ratio;
+    thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+    const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
+    
+    if (state.editingPageId !== null) {
+      const idx = state.pages.findIndex(p => p.id === state.editingPageId);
+      if (idx >= 0) {
+        URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
+        state.pages[idx] = { id: state.editingPageId, blob, width: newW, height: newH, thumbnailUrl };
+      }
+      state.editingPageId = null;
+    } else {
+      state.currentPageData = { id: Date.now() + Math.random(), blob, width: newW, height: newH, thumbnailUrl };
+    }
+    
+    const url = URL.createObjectURL(blob);
+    document.getElementById('resultImage').src = url;
+    document.getElementById('resultPageCount').textContent = state.pages.length + 1;
+    
+    const resultKB = Math.round(blob.size / 1024);
+    const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
+    document.getElementById('resultInfo').innerHTML = `
+      <div><strong>Dimensiones:</strong> ${newW} × ${newH} px</div>
+      <div><strong>Tamaño:</strong> ${resultKB} KB</div>
+      <div><strong>Tiempo:</strong> ${elapsed}s ⚡</div>
+      <div><strong>Modo:</strong> Sin corrección</div>
+      <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
+    `;
+    
+    hideLoading();
+    
+    if (state.pendingImages.length > 0) {
+      if (state.currentPageData) {
+        state.pages.push(state.currentPageData);
+        state.currentPageData = null;
+      }
+      state.pendingIndex++;
+      loadNextPendingImage();
+    } else {
+      showScreen('screen-result');
+      showToast(`✅ Listo en ${elapsed}s`, 'success');
+    }
+  }, 'image/jpeg', quality.jpegQuality);
 }
 
 /* =========================================================
@@ -983,7 +1267,7 @@ function addAnotherPage() {
     state.currentPageData = null;
   }
   if (state.pages.length >= MAX_PAGES) {
-    showToast(`Límite de ${MAX_PAGES} páginas alcanzado`, 'warning');
+    showToast(`Límite de ${MAX_PAGES} páginas`, 'warning');
     showScreen('screen-gallery');
     renderGallery();
     return;
@@ -1021,7 +1305,7 @@ function renderGallery() {
       <div class="gallery-empty">
         <div class="icon">📭</div>
         <div><strong>No hay páginas</strong></div>
-        <div style="font-size:13px">Toca "Agregar" para capturar tu primera página</div>
+        <div style="font-size:13px">Toca "Agregar más" para capturar páginas</div>
       </div>
     `;
     return;
@@ -1073,8 +1357,11 @@ function editPage(id) {
       { x: img.width, y: img.height },
       { x: 0, y: img.height }
     ];
+    state.pendingImages = [];
+    state.pendingIndex = 0;
     hideLoading();
     showScreen('screen-editor');
+    updateEditorCounter();
     drawEditor();
     URL.revokeObjectURL(url);
   };
