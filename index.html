@@ -345,6 +345,110 @@
   }
   .gallery-empty .icon { font-size: 48px; }
   
+  /* 🆕 PANTALLA CONFIGURACIÓN PDF */
+  .pdf-config-container {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .config-section {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .config-section h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .config-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--surface-light);
+    color: var(--text);
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+  }
+  .config-input:focus { border-color: var(--primary); }
+  
+  .compression-presets {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .compression-preset {
+    background: var(--bg);
+    border: 2px solid var(--surface-light);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .compression-preset.active {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.1);
+  }
+  .compression-preset .preset-icon {
+    font-size: 24px;
+    width: 40px;
+    text-align: center;
+  }
+  .compression-preset .preset-info { flex: 1; }
+  .compression-preset .preset-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .compression-preset .preset-desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .compression-preset .preset-quality {
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 600;
+  }
+  
+  .pdf-preview {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .preview-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .preview-row strong { color: var(--text); }
+  .preview-row.highlight strong { color: var(--success); }
+  
+  .pdf-config-footer {
+    background: var(--surface);
+    padding: 12px;
+    border-top: 1px solid var(--surface-light);
+    display: flex;
+    gap: 8px;
+  }
+  .pdf-config-footer button { flex: 1; padding: 14px; font-size: 15px; }
+  .btn-back-config { background: var(--surface-light); color: var(--text); }
+  .btn-generate-final { background: var(--success); color: white; font-weight: 600; }
+  
   .loading-overlay {
     position: fixed;
     inset: 0;
@@ -472,7 +576,6 @@
       <button class="btn-capture secondary" onclick="captureFromFile()">
         <span class="icon">🖼️</span> Subir 1 imagen
       </button>
-      <!-- 🆕 Botón de selección múltiple -->
       <button class="btn-capture multi" onclick="captureMultipleFiles()">
         <span class="icon">📚</span>
         <div>
@@ -542,8 +645,86 @@
     <div class="gallery-list" id="galleryList"></div>
     <div class="gallery-footer">
       <button class="tool-btn btn-add-more" onclick="addMorePages()">➕ Agregar más</button>
-      <button class="tool-btn btn-generate" onclick="generatePDF()">📑 Generar PDF A4</button>
+      <button class="tool-btn btn-generate" onclick="openPdfConfig()">📑 Generar PDF A4</button>
     </div>
+  </div>
+</div>
+
+<!-- 🆕 PANTALLA CONFIGURACIÓN PDF -->
+<div id="screen-pdf-config" class="screen">
+  <div class="header">
+    <button class="btn-back" onclick="backToGallery()">←</button>
+    <h1>Configurar PDF</h1>
+  </div>
+  <div class="pdf-config-container">
+    <div class="config-section">
+      <h3>📝 Nombre del documento</h3>
+      <input type="text" class="config-input" id="pdfName" placeholder="Mi documento" value="">
+    </div>
+    
+    <div class="config-section">
+      <h3>🗜️ Compresión del PDF</h3>
+      <div class="compression-presets">
+        <div class="compression-preset" data-preset="high" onclick="setPdfCompression('high')">
+          <div class="preset-icon">🎯</div>
+          <div class="preset-info">
+            <div class="preset-name">Alta calidad</div>
+            <div class="preset-desc">Máxima definición, archivo más grande</div>
+          </div>
+          <div class="preset-quality">90%</div>
+        </div>
+        <div class="compression-preset active" data-preset="balanced" onclick="setPdfCompression('balanced')">
+          <div class="preset-icon">⚖️</div>
+          <div class="preset-info">
+            <div class="preset-name">Equilibrado</div>
+            <div class="preset-desc">Buen balance calidad/tamaño</div>
+          </div>
+          <div class="preset-quality">75%</div>
+        </div>
+        <div class="compression-preset" data-preset="max" onclick="setPdfCompression('max')">
+          <div class="preset-icon">⚡</div>
+          <div class="preset-info">
+            <div class="preset-name">Máxima compresión</div>
+            <div class="preset-desc">Archivo más pequeño, calidad aceptable</div>
+          </div>
+          <div class="preset-quality">50%</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="config-section">
+      <h3>📊 Vista previa</h3>
+      <div class="pdf-preview" id="pdfPreview">
+        <div class="preview-row">
+          <span>Páginas:</span>
+          <strong id="previewPages">0</strong>
+        </div>
+        <div class="preview-row">
+          <span>Hojas A4 estimadas:</span>
+          <strong id="previewSheets">0</strong>
+        </div>
+        <div class="preview-row">
+          <span>Tamaño original:</span>
+          <strong id="previewOriginalSize">0 KB</strong>
+        </div>
+        <div class="preview-row highlight">
+          <span>Tamaño estimado PDF:</span>
+          <strong id="previewPdfSize">0 KB</strong>
+        </div>
+        <div class="preview-row">
+          <span>Formato:</span>
+          <strong>A4 (210 × 297 mm)</strong>
+        </div>
+        <div class="preview-row">
+          <span>Márgenes:</span>
+          <strong>10 mm</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pdf-config-footer">
+    <button class="tool-btn btn-back-config" onclick="backToGallery()">← Volver</button>
+    <button class="tool-btn btn-generate-final" onclick="generateFinalPdf()">📥 Generar y descargar</button>
   </div>
 </div>
 
@@ -567,169 +748,103 @@
   </div>
 </div>
 
-<!-- 🆕 INPUTS: cámara (1 foto), archivo (1 foto), múltiple (varias) -->
 <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <input type="file" id="multiFileInput" accept="image/*" multiple style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<!-- 🆕 jsPDF para generación de PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 /* =========================================================
-   🆕 MOTOR DE HOMOGRAFÍA PROPIO (reemplaza OpenCV.js)
-   Implementación en JavaScript puro, optimizada para velocidad
+   MOTOR DE HOMOGRAFÍA (JS PURO)
    ========================================================= */
 const Homography = {
-  // Resolver sistema lineal 8x8 con eliminación gaussiana
   solveLinearSystem(A, b) {
     const n = b.length;
     const M = A.map((row, i) => [...row, b[i]]);
-    
-    // Eliminación hacia adelante
     for (let col = 0; col < n; col++) {
-      // Buscar pivote
       let maxRow = col;
       for (let row = col + 1; row < n; row++) {
         if (Math.abs(M[row][col]) > Math.abs(M[maxRow][col])) maxRow = row;
       }
       [M[col], M[maxRow]] = [M[maxRow], M[col]];
-      
       if (Math.abs(M[col][col]) < 1e-10) return null;
-      
       for (let row = col + 1; row < n; row++) {
         const factor = M[row][col] / M[col][col];
-        for (let j = col; j <= n; j++) {
-          M[row][j] -= factor * M[col][j];
-        }
+        for (let j = col; j <= n; j++) M[row][j] -= factor * M[col][j];
       }
     }
-    
-    // Sustitución hacia atrás
     const x = new Array(n);
     for (let row = n - 1; row >= 0; row--) {
       let sum = M[row][n];
-      for (let j = row + 1; j < n; j++) {
-        sum -= M[row][j] * x[j];
-      }
+      for (let j = row + 1; j < n; j++) sum -= M[row][j] * x[j];
       x[row] = sum / M[row][row];
     }
     return x;
   },
-  
-  // Calcular matriz homográfica desde 4 puntos fuente y 4 destino
   computeHomography(src, dst) {
-    // src y dst son arrays de 4 puntos {x, y}
-    const A = [];
-    const b = [];
-    
+    const A = [], b = [];
     for (let i = 0; i < 4; i++) {
       const sx = src[i].x, sy = src[i].y;
       const dx = dst[i].x, dy = dst[i].y;
-      
       A.push([sx, sy, 1, 0, 0, 0, -dx*sx, -dx*sy]);
       b.push(dx);
       A.push([0, 0, 0, sx, sy, 1, -dy*sx, -dy*sy]);
       b.push(dy);
     }
-    
     const h = this.solveLinearSystem(A, b);
     if (!h) return null;
-    
-    // Retornar como matriz 3x3
-    return [
-      [h[0], h[1], h[2]],
-      [h[3], h[4], h[5]],
-      [h[6], h[7], 1]
-    ];
+    return [[h[0],h[1],h[2]],[h[3],h[4],h[5]],[h[6],h[7],1]];
   },
-  
-  // Aplicar transformación de perspectiva
   warpPerspective(sourceData, srcWidth, srcHeight, H, dstWidth, dstHeight) {
-    // Calcular inversa de H
-    const det = H[0][0] * (H[1][1] * H[2][2] - H[1][2] * H[2][1])
-              - H[0][1] * (H[1][0] * H[2][2] - H[1][2] * H[2][0])
-              + H[0][2] * (H[1][0] * H[2][1] - H[1][1] * H[2][0]);
-    
+    const det = H[0][0]*(H[1][1]*H[2][2]-H[1][2]*H[2][1])
+              - H[0][1]*(H[1][0]*H[2][2]-H[1][2]*H[2][0])
+              + H[0][2]*(H[1][0]*H[2][1]-H[1][1]*H[2][0]);
     if (Math.abs(det) < 1e-10) return null;
-    
-    const invDet = 1 / det;
+    const invDet = 1/det;
     const Hinv = [
-      [(H[1][1]*H[2][2] - H[1][2]*H[2][1]) * invDet,
-       (H[0][2]*H[2][1] - H[0][1]*H[2][2]) * invDet,
-       (H[0][1]*H[1][2] - H[0][2]*H[1][1]) * invDet],
-      [(H[1][2]*H[2][0] - H[1][0]*H[2][2]) * invDet,
-       (H[0][0]*H[2][2] - H[0][2]*H[2][0]) * invDet,
-       (H[0][2]*H[1][0] - H[0][0]*H[1][2]) * invDet],
-      [(H[1][0]*H[2][1] - H[1][1]*H[2][0]) * invDet,
-       (H[0][1]*H[2][0] - H[0][0]*H[2][1]) * invDet,
-       (H[0][0]*H[1][1] - H[0][1]*H[1][0]) * invDet]
+      [(H[1][1]*H[2][2]-H[1][2]*H[2][1])*invDet,(H[0][2]*H[2][1]-H[0][1]*H[2][2])*invDet,(H[0][1]*H[1][2]-H[0][2]*H[1][1])*invDet],
+      [(H[1][2]*H[2][0]-H[1][0]*H[2][2])*invDet,(H[0][0]*H[2][2]-H[0][2]*H[2][0])*invDet,(H[0][2]*H[1][0]-H[0][0]*H[1][2])*invDet],
+      [(H[1][0]*H[2][1]-H[1][1]*H[2][0])*invDet,(H[0][1]*H[2][0]-H[0][0]*H[2][1])*invDet,(H[0][0]*H[1][1]-H[0][1]*H[1][0])*invDet]
     ];
-    
-    // Crear buffer de destino
-    const dstData = new Uint8ClampedArray(dstWidth * dstHeight * 4);
-    
-    // Para cada píxel de destino, calcular posición en fuente
+    const dstData = new Uint8ClampedArray(dstWidth*dstHeight*4);
     for (let y = 0; y < dstHeight; y++) {
       for (let x = 0; x < dstWidth; x++) {
-        // Aplicar homografía inversa
-        const w = Hinv[2][0] * x + Hinv[2][1] * y + Hinv[2][2];
-        const srcX = (Hinv[0][0] * x + Hinv[0][1] * y + Hinv[0][2]) / w;
-        const srcY = (Hinv[1][0] * x + Hinv[1][1] * y + Hinv[1][2]) / w;
-        
-        // Interpolación bilineal
-        const x0 = Math.floor(srcX);
-        const y0 = Math.floor(srcY);
-        const x1 = x0 + 1;
-        const y1 = y0 + 1;
-        
-        if (x0 < 0 || x1 >= srcWidth || y0 < 0 || y1 >= srcHeight) {
-          // Fuera de bounds - dejar transparente
-          const dstIdx = (y * dstWidth + x) * 4;
-          dstData[dstIdx] = 255;
-          dstData[dstIdx + 1] = 255;
-          dstData[dstIdx + 2] = 255;
-          dstData[dstIdx + 3] = 255;
+        const w = Hinv[2][0]*x + Hinv[2][1]*y + Hinv[2][2];
+        const srcX = (Hinv[0][0]*x + Hinv[0][1]*y + Hinv[0][2]) / w;
+        const srcY = (Hinv[1][0]*x + Hinv[1][1]*y + Hinv[1][2]) / w;
+        const x0 = Math.floor(srcX), y0 = Math.floor(srcY);
+        const x1 = x0+1, y1 = y0+1;
+        const dstIdx = (y*dstWidth+x)*4;
+        if (x0<0 || x1>=srcWidth || y0<0 || y1>=srcHeight) {
+          dstData[dstIdx]=255; dstData[dstIdx+1]=255; dstData[dstIdx+2]=255; dstData[dstIdx+3]=255;
           continue;
         }
-        
-        const fx = srcX - x0;
-        const fy = srcY - y0;
-        
-        const idx00 = (y0 * srcWidth + x0) * 4;
-        const idx01 = (y0 * srcWidth + x1) * 4;
-        const idx10 = (y1 * srcWidth + x0) * 4;
-        const idx11 = (y1 * srcWidth + x1) * 4;
-        
-        const dstIdx = (y * dstWidth + x) * 4;
-        
+        const fx = srcX-x0, fy = srcY-y0;
+        const idx00=(y0*srcWidth+x0)*4, idx01=(y0*srcWidth+x1)*4;
+        const idx10=(y1*srcWidth+x0)*4, idx11=(y1*srcWidth+x1)*4;
         for (let c = 0; c < 4; c++) {
-          const v00 = sourceData[idx00 + c];
-          const v01 = sourceData[idx01 + c];
-          const v10 = sourceData[idx10 + c];
-          const v11 = sourceData[idx11 + c];
-          
-          const v0 = v00 * (1 - fx) + v01 * fx;
-          const v1 = v10 * (1 - fx) + v11 * fx;
-          dstData[dstIdx + c] = v0 * (1 - fy) + v1 * fy;
+          const v0 = sourceData[idx00+c]*(1-fx) + sourceData[idx01+c]*fx;
+          const v1 = sourceData[idx10+c]*(1-fx) + sourceData[idx11+c]*fx;
+          dstData[dstIdx+c] = v0*(1-fy) + v1*fy;
         }
       }
     }
-    
     return dstData;
   }
 };
 
 /* =========================================================
-   CONFIGURACIÓN DE CALIDAD
+   CONFIGURACIÓN DE CALIDAD (para captura)
    ========================================================= */
 const QUALITY_PRESETS = {
   fast: { maxDim: 600, jpegQuality: 0.82, label: 'Rápido (600px)' },
   balanced: { maxDim: 1000, jpegQuality: 0.88, label: 'Normal (1000px)' },
   high: { maxDim: 1500, jpegQuality: 0.92, label: 'Alta (1500px)' }
 };
-
 let currentQuality = 'fast';
-
 function setQuality(level) {
   currentQuality = level;
   document.querySelectorAll('.quality-option').forEach(el => {
@@ -737,15 +852,31 @@ function setQuality(level) {
   });
   localStorage.setItem('scanlens_quality', level);
 }
-
 const savedQuality = localStorage.getItem('scanlens_quality');
 if (savedQuality && QUALITY_PRESETS[savedQuality]) setQuality(savedQuality);
+
+/* =========================================================
+   🆕 CONFIGURACIÓN DE COMPRESIÓN PDF
+   ========================================================= */
+const PDF_COMPRESSION = {
+  high: { quality: 0.90, maxDim: 1800, label: 'Alta calidad (90%)' },
+  balanced: { quality: 0.75, maxDim: 1400, label: 'Equilibrado (75%)' },
+  max: { quality: 0.50, maxDim: 1000, label: 'Máxima compresión (50%)' }
+};
+let currentPdfCompression = 'balanced';
+
+function setPdfCompression(level) {
+  currentPdfCompression = level;
+  document.querySelectorAll('.compression-preset').forEach(el => {
+    el.classList.toggle('active', el.dataset.preset === level);
+  });
+  updatePdfPreview();
+}
 
 /* =========================================================
    ESTADO GLOBAL
    ========================================================= */
 const MAX_PAGES = 50;
-
 const state = {
   originalImage: null,
   corners: [{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}],
@@ -755,7 +886,6 @@ const state = {
   currentPageDims: { w: 0, h: 0 },
   pages: [],
   editingPageId: null,
-  // 🆕 Cola de imágenes para procesamiento en lote
   pendingImages: [],
   pendingIndex: 0
 };
@@ -763,6 +893,9 @@ const state = {
 const canvas = document.getElementById('editorCanvas');
 const ctx = canvas.getContext('2d');
 let sortableInstance = null;
+
+// Nombre por defecto del PDF
+document.getElementById('pdfName').value = `Documento_${new Date().toISOString().slice(0,10)}`;
 
 /* =========================================================
    NAVEGACIÓN
@@ -773,29 +906,17 @@ function showScreen(id) {
 }
 function goHome() { showScreen('screen-home'); }
 function cancelEditor() {
-  if (state.pages.length > 0) {
-    showScreen('screen-gallery');
-    renderGallery();
-  } else {
-    goHome();
-  }
+  if (state.pages.length > 0) { showScreen('screen-gallery'); renderGallery(); }
+  else goHome();
 }
-function backFromResult() {
-  showScreen('screen-editor');
-  drawEditor();
-}
+function backFromResult() { showScreen('screen-editor'); drawEditor(); }
 function backFromGallery() {
   if (state.pages.length > 0) {
-    showConfirm(
-      '¿Descartar documento?',
-      `Tienes ${state.pages.length} página(s). Si sales, se perderán.`,
-      'Descartar',
-      () => { clearAllPages(); goHome(); }
-    );
-  } else {
-    goHome();
-  }
+    showConfirm('¿Descartar documento?', `Tienes ${state.pages.length} página(s). Si sales, se perderán.`, 'Descartar',
+      () => { clearAllPages(); goHome(); });
+  } else goHome();
 }
+function backToGallery() { showScreen('screen-gallery'); renderGallery(); }
 
 /* =========================================================
    CAPTURA
@@ -806,25 +927,20 @@ function captureMultipleFiles() { document.getElementById('multiFileInput').clic
 
 document.getElementById('cameraInput').addEventListener('change', (e) => handleFileSelect(e, false));
 document.getElementById('fileInput').addEventListener('change', (e) => handleFileSelect(e, false));
-// 🆕 Manejo de múltiples archivos
 document.getElementById('multiFileInput').addEventListener('change', (e) => handleFileSelect(e, true));
 
 function handleFileSelect(e, isMultiple) {
   const files = Array.from(e.target.files);
   if (!files.length) return;
-  
   if (state.pages.length + files.length > MAX_PAGES) {
     showToast(`Límite de ${MAX_PAGES} páginas`, 'warning');
     e.target.value = '';
     return;
   }
-  
   if (isMultiple && files.length > 1) {
-    // 🆕 Cargar todas las imágenes en cola
     showLoading(`Cargando ${files.length} imágenes...`);
     state.pendingImages = [];
     state.pendingIndex = 0;
-    
     let loaded = 0;
     files.forEach((file, idx) => {
       const reader = new FileReader();
@@ -833,24 +949,15 @@ function handleFileSelect(e, isMultiple) {
         img.onload = () => {
           state.pendingImages[idx] = img;
           loaded++;
-          document.getElementById('loadingText').textContent = 
-            `Cargando ${loaded}/${files.length} imágenes...`;
-          
-          if (loaded === files.length) {
-            hideLoading();
-            // Empezar con la primera imagen
-            loadNextPendingImage();
-          }
+          document.getElementById('loadingText').textContent = `Cargando ${loaded}/${files.length} imágenes...`;
+          if (loaded === files.length) { hideLoading(); loadNextPendingImage(); }
         };
         img.onerror = () => {
           loaded++;
           if (loaded === files.length) {
             hideLoading();
-            if (state.pendingImages.length > 0) {
-              loadNextPendingImage();
-            } else {
-              showToast('Error al cargar imágenes', 'error');
-            }
+            if (state.pendingImages.length > 0) loadNextPendingImage();
+            else showToast('Error al cargar imágenes', 'error');
           }
         };
         img.src = ev.target.result;
@@ -858,7 +965,6 @@ function handleFileSelect(e, isMultiple) {
       reader.readAsDataURL(file);
     });
   } else {
-    // Flujo normal de 1 imagen
     showLoading('Cargando imagen...');
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -882,10 +988,8 @@ function handleFileSelect(e, isMultiple) {
   e.target.value = '';
 }
 
-// 🆕 Cargar la siguiente imagen pendiente de la cola
 function loadNextPendingImage() {
   if (state.pendingIndex >= state.pendingImages.length) {
-    // Todas procesadas, ir a galería
     state.pendingImages = [];
     state.pendingIndex = 0;
     showScreen('screen-gallery');
@@ -893,7 +997,6 @@ function loadNextPendingImage() {
     showToast(`✅ ${state.pages.length} páginas agregadas`, 'success');
     return;
   }
-  
   state.originalImage = state.pendingImages[state.pendingIndex];
   state.editingPageId = null;
   initCorners();
@@ -907,9 +1010,7 @@ function updateEditorCounter() {
   if (state.pendingImages.length > 0) {
     counter.textContent = `${state.pendingIndex + 1} / ${state.pendingImages.length}`;
     counter.style.display = 'block';
-  } else {
-    counter.style.display = 'none';
-  }
+  } else counter.style.display = 'none';
 }
 
 /* =========================================================
@@ -925,11 +1026,7 @@ function initCorners() {
     { x: margin, y: img.height - margin }
   ];
 }
-function resetCorners() {
-  initCorners();
-  drawEditor();
-  showToast('Esquinas reiniciadas');
-}
+function resetCorners() { initCorners(); drawEditor(); showToast('Esquinas reiniciadas'); }
 
 /* =========================================================
    DIBUJO DEL EDITOR
@@ -938,40 +1035,28 @@ function drawEditor() {
   if (!state.originalImage) return;
   const img = state.originalImage;
   const wrapper = canvas.parentElement;
-  const maxW = wrapper.clientWidth;
-  const maxH = wrapper.clientHeight;
+  const maxW = wrapper.clientWidth, maxH = wrapper.clientHeight;
   const scale = Math.min(maxW / img.width, maxH / img.height);
   state.displayScale = scale;
   canvas.width = img.width * scale;
   canvas.height = img.height * scale;
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  
   ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
   ctx.beginPath();
   state.corners.forEach((c, i) => {
     const x = c.x * scale, y = c.y * scale;
     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   });
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = '#2563eb';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-  
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#2563eb'; ctx.lineWidth = 2; ctx.stroke();
   state.corners.forEach((c, i) => {
     const x = c.x * scale, y = c.y * scale;
     const r = state.draggingCorner === i ? 18 : 14;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fillStyle = state.draggingCorner === i ? '#f59e0b' : '#2563eb';
-    ctx.fill();
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 12px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.fill(); ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(i + 1, x, y);
   });
 }
@@ -988,17 +1073,12 @@ function findCornerAt(pos) {
   const threshold = 30;
   for (let i = 0; i < state.corners.length; i++) {
     const c = state.corners[i];
-    const cx = c.x * state.displayScale;
-    const cy = c.y * state.displayScale;
+    const cx = c.x * state.displayScale, cy = c.y * state.displayScale;
     if (Math.hypot(pos.x - cx, pos.y - cy) <= threshold) return i;
   }
   return -1;
 }
-function onPointerDown(e) {
-  e.preventDefault();
-  state.draggingCorner = findCornerAt(getPointerPos(e));
-  drawEditor();
-}
+function onPointerDown(e) { e.preventDefault(); state.draggingCorner = findCornerAt(getPointerPos(e)); drawEditor(); }
 function onPointerMove(e) {
   if (state.draggingCorner < 0) return;
   e.preventDefault();
@@ -1010,10 +1090,7 @@ function onPointerMove(e) {
   };
   drawEditor();
 }
-function onPointerUp() {
-  state.draggingCorner = -1;
-  drawEditor();
-}
+function onPointerUp() { state.draggingCorner = -1; drawEditor(); }
 canvas.addEventListener('mousedown', onPointerDown);
 canvas.addEventListener('mousemove', onPointerMove);
 canvas.addEventListener('mouseup', onPointerUp);
@@ -1023,114 +1100,65 @@ canvas.addEventListener('touchmove', onPointerMove, { passive: false });
 canvas.addEventListener('touchend', onPointerUp);
 
 /* =========================================================
-   🆕 CORRECCIÓN DE PERSPECTIVA (SIN OPENCV, JS PURO)
+   CORRECCIÓN DE PERSPECTIVA
    ========================================================= */
 async function applyPerspective() {
   const t0 = performance.now();
   const quality = QUALITY_PRESETS[currentQuality];
-  
   try {
     showLoading('Preparando imagen...', 20);
     await new Promise(r => setTimeout(r, 30));
-    
     const img = state.originalImage;
     const corners = state.corners;
-    
-    // Redimensionar si es muy grande
     const origW = img.width, origH = img.height;
     const maxDim = Math.max(origW, origH);
     let processScale = 1;
     let srcCanvas;
-    
     if (maxDim > quality.maxDim) {
       processScale = quality.maxDim / maxDim;
-      const newW = Math.round(origW * processScale);
-      const newH = Math.round(origH * processScale);
+      const newW = Math.round(origW * processScale), newH = Math.round(origH * processScale);
       srcCanvas = document.createElement('canvas');
-      srcCanvas.width = newW;
-      srcCanvas.height = newH;
+      srcCanvas.width = newW; srcCanvas.height = newH;
       srcCanvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
     } else {
       srcCanvas = document.createElement('canvas');
-      srcCanvas.width = origW;
-      srcCanvas.height = origH;
+      srcCanvas.width = origW; srcCanvas.height = origH;
       srcCanvas.getContext('2d').drawImage(img, 0, 0);
     }
-    
-    const srcCtx = srcCanvas.getContext('2d');
-    const srcImageData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
-    
+    const srcImageData = srcCanvas.getContext('2d').getImageData(0, 0, srcCanvas.width, srcCanvas.height);
     showLoading('Corrigiendo perspectiva...', 50);
     await new Promise(r => setTimeout(r, 30));
-    
-    // Escalar esquinas
-    const scaledCorners = corners.map(c => ({
-      x: c.x * processScale,
-      y: c.y * processScale
-    }));
-    
-    // Calcular dimensiones destino
+    const scaledCorners = corners.map(c => ({ x: c.x * processScale, y: c.y * processScale }));
     const widthTop = Math.hypot(scaledCorners[1].x - scaledCorners[0].x, scaledCorners[1].y - scaledCorners[0].y);
     const widthBottom = Math.hypot(scaledCorners[2].x - scaledCorners[3].x, scaledCorners[2].y - scaledCorners[3].y);
     const heightLeft = Math.hypot(scaledCorners[3].x - scaledCorners[0].x, scaledCorners[3].y - scaledCorners[0].y);
     const heightRight = Math.hypot(scaledCorners[2].x - scaledCorners[1].x, scaledCorners[2].y - scaledCorners[1].y);
-    
     const dstWidth = Math.round(Math.max(widthTop, widthBottom));
     const dstHeight = Math.round(Math.max(heightLeft, heightRight));
-    
-    // Calcular homografía (esquinas marcadas → rectángulo)
-    const H = Homography.computeHomography(
-      scaledCorners,
-      [
-        { x: 0, y: 0 },
-        { x: dstWidth, y: 0 },
-        { x: dstWidth, y: dstHeight },
-        { x: 0, y: dstHeight }
-      ]
-    );
-    
+    const H = Homography.computeHomography(scaledCorners, [
+      { x: 0, y: 0 }, { x: dstWidth, y: 0 },
+      { x: dstWidth, y: dstHeight }, { x: 0, y: dstHeight }
+    ]);
     if (!H) throw new Error('No se pudo calcular la transformación');
-    
     showLoading('Aplicando transformación...', 75);
     await new Promise(r => setTimeout(r, 30));
-    
-    // Aplicar warp
-    const dstData = Homography.warpPerspective(
-      srcImageData.data,
-      srcCanvas.width,
-      srcCanvas.height,
-      H,
-      dstWidth,
-      dstHeight
-    );
-    
+    const dstData = Homography.warpPerspective(srcImageData.data, srcCanvas.width, srcCanvas.height, H, dstWidth, dstHeight);
     if (!dstData) throw new Error('Error en la transformación');
-    
     showLoading('Generando imagen...', 90);
     await new Promise(r => setTimeout(r, 30));
-    
-    // Crear canvas con resultado
     const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = dstWidth;
-    tempCanvas.height = dstHeight;
+    tempCanvas.width = dstWidth; tempCanvas.height = dstHeight;
     const tempCtx = tempCanvas.getContext('2d');
-    const outImageData = new ImageData(dstData, dstWidth, dstHeight);
-    tempCtx.putImageData(outImageData, 0, 0);
-    
-    // Convertir a blob JPEG
+    tempCtx.putImageData(new ImageData(dstData, dstWidth, dstHeight), 0, 0);
     tempCanvas.toBlob((blob) => {
       state.currentPageBlob = blob;
       state.currentPageDims = { w: dstWidth, h: dstHeight };
-      
-      // Thumbnail
       const thumbCanvas = document.createElement('canvas');
       const thumbSize = 150;
       const ratio = Math.min(thumbSize / dstWidth, thumbSize / dstHeight);
-      thumbCanvas.width = dstWidth * ratio;
-      thumbCanvas.height = dstHeight * ratio;
+      thumbCanvas.width = dstWidth * ratio; thumbCanvas.height = dstHeight * ratio;
       thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
       const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
-      
       if (state.editingPageId !== null) {
         const idx = state.pages.findIndex(p => p.id === state.editingPageId);
         if (idx >= 0) {
@@ -1141,11 +1169,9 @@ async function applyPerspective() {
       } else {
         state.currentPageData = { id: Date.now() + Math.random(), blob, width: dstWidth, height: dstHeight, thumbnailUrl };
       }
-      
       const url = URL.createObjectURL(blob);
       document.getElementById('resultImage').src = url;
       document.getElementById('resultPageCount').textContent = state.pages.length + 1;
-      
       const resultKB = Math.round(blob.size / 1024);
       const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
       document.getElementById('resultInfo').innerHTML = `
@@ -1155,16 +1181,9 @@ async function applyPerspective() {
         <div><strong>Calidad:</strong> ${quality.label}</div>
         <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
       `;
-      
       hideLoading();
-      
-      // 🆕 Si hay más imágenes en cola, procesar la siguiente automáticamente
       if (state.pendingImages.length > 0) {
-        // Guardar página actual
-        if (state.currentPageData) {
-          state.pages.push(state.currentPageData);
-          state.currentPageData = null;
-        }
+        if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
         state.pendingIndex++;
         showToast(`Página ${state.pendingIndex} procesada en ${elapsed}s`, 'success');
         loadNextPendingImage();
@@ -1173,7 +1192,6 @@ async function applyPerspective() {
         showToast(`✅ Listo en ${elapsed}s`, 'success');
       }
     }, 'image/jpeg', quality.jpegQuality);
-    
   } catch (err) {
     console.error(err);
     hideLoading();
@@ -1181,42 +1199,31 @@ async function applyPerspective() {
   }
 }
 
-// 🆕 Saltar corrección de perspectiva (usar imagen tal cual)
 async function skipCorrection() {
   const t0 = performance.now();
   const quality = QUALITY_PRESETS[currentQuality];
-  
   showLoading('Procesando...', 30);
   await new Promise(r => setTimeout(r, 30));
-  
   const img = state.originalImage;
   const origW = img.width, origH = img.height;
   const maxDim = Math.max(origW, origH);
   let newW = origW, newH = origH;
-  
   if (maxDim > quality.maxDim) {
     const scale = quality.maxDim / maxDim;
-    newW = Math.round(origW * scale);
-    newH = Math.round(origH * scale);
+    newW = Math.round(origW * scale); newH = Math.round(origH * scale);
   }
-  
   const tempCanvas = document.createElement('canvas');
-  tempCanvas.width = newW;
-  tempCanvas.height = newH;
+  tempCanvas.width = newW; tempCanvas.height = newH;
   tempCanvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
-  
   tempCanvas.toBlob((blob) => {
     state.currentPageBlob = blob;
     state.currentPageDims = { w: newW, h: newH };
-    
     const thumbCanvas = document.createElement('canvas');
     const thumbSize = 150;
     const ratio = Math.min(thumbSize / newW, thumbSize / newH);
-    thumbCanvas.width = newW * ratio;
-    thumbCanvas.height = newH * ratio;
+    thumbCanvas.width = newW * ratio; thumbCanvas.height = newH * ratio;
     thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
     const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
-    
     if (state.editingPageId !== null) {
       const idx = state.pages.findIndex(p => p.id === state.editingPageId);
       if (idx >= 0) {
@@ -1227,11 +1234,9 @@ async function skipCorrection() {
     } else {
       state.currentPageData = { id: Date.now() + Math.random(), blob, width: newW, height: newH, thumbnailUrl };
     }
-    
     const url = URL.createObjectURL(blob);
     document.getElementById('resultImage').src = url;
     document.getElementById('resultPageCount').textContent = state.pages.length + 1;
-    
     const resultKB = Math.round(blob.size / 1024);
     const elapsed = ((performance.now() - t0) / 1000).toFixed(2);
     document.getElementById('resultInfo').innerHTML = `
@@ -1241,14 +1246,9 @@ async function skipCorrection() {
       <div><strong>Modo:</strong> Sin corrección</div>
       <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
     `;
-    
     hideLoading();
-    
     if (state.pendingImages.length > 0) {
-      if (state.currentPageData) {
-        state.pages.push(state.currentPageData);
-        state.currentPageData = null;
-      }
+      if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
       state.pendingIndex++;
       loadNextPendingImage();
     } else {
@@ -1262,35 +1262,24 @@ async function skipCorrection() {
    ACCIONES DESDE RESULTADO
    ========================================================= */
 function addAnotherPage() {
-  if (state.currentPageData) {
-    state.pages.push(state.currentPageData);
-    state.currentPageData = null;
-  }
+  if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
   if (state.pages.length >= MAX_PAGES) {
     showToast(`Límite de ${MAX_PAGES} páginas`, 'warning');
-    showScreen('screen-gallery');
-    renderGallery();
-    return;
+    showScreen('screen-gallery'); renderGallery(); return;
   }
   showToast(`Página guardada (${state.pages.length})`, 'success');
   goHome();
 }
 function finishDocument() {
-  if (state.currentPageData) {
-    state.pages.push(state.currentPageData);
-    state.currentPageData = null;
-  }
-  showScreen('screen-gallery');
-  renderGallery();
+  if (state.currentPageData) { state.pages.push(state.currentPageData); state.currentPageData = null; }
+  showScreen('screen-gallery'); renderGallery();
 }
 function downloadSinglePage() {
   if (!state.currentPageBlob) return;
   const url = URL.createObjectURL(state.currentPageBlob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `pagina_${Date.now()}.jpg`;
-  a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = `pagina_${Date.now()}.jpg`;
+  a.click(); URL.revokeObjectURL(url);
   showToast('Página descargada', 'success');
 }
 
@@ -1323,7 +1312,6 @@ function renderGallery() {
       </div>
     </div>
   `).join('');
-  
   if (!sortableInstance) {
     sortableInstance = Sortable.create(list, {
       animation: 150,
@@ -1352,13 +1340,10 @@ function editPage(id) {
     state.originalImage = img;
     state.editingPageId = page.id;
     state.corners = [
-      { x: 0, y: 0 },
-      { x: img.width, y: 0 },
-      { x: img.width, y: img.height },
-      { x: 0, y: img.height }
+      { x: 0, y: 0 }, { x: img.width, y: 0 },
+      { x: img.width, y: img.height }, { x: 0, y: img.height }
     ];
-    state.pendingImages = [];
-    state.pendingIndex = 0;
+    state.pendingImages = []; state.pendingIndex = 0;
     hideLoading();
     showScreen('screen-editor');
     updateEditorCounter();
@@ -1369,20 +1354,15 @@ function editPage(id) {
   img.src = url;
 }
 function deletePage(id) {
-  showConfirm(
-    '¿Eliminar página?',
-    'Esta página se eliminará del documento.',
-    'Eliminar',
-    () => {
-      const idx = state.pages.findIndex(p => p.id == id);
-      if (idx >= 0) {
-        URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
-        state.pages.splice(idx, 1);
-        renderGallery();
-        showToast('Página eliminada');
-      }
+  showConfirm('¿Eliminar página?', 'Esta página se eliminará del documento.', 'Eliminar', () => {
+    const idx = state.pages.findIndex(p => p.id == id);
+    if (idx >= 0) {
+      URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
+      state.pages.splice(idx, 1);
+      renderGallery();
+      showToast('Página eliminada');
     }
-  );
+  });
 }
 function clearAllPages() {
   state.pages.forEach(p => URL.revokeObjectURL(p.thumbnailUrl));
@@ -1390,12 +1370,196 @@ function clearAllPages() {
   state.currentPageData = null;
   state.editingPageId = null;
 }
-function generatePDF() {
+
+/* =========================================================
+   🆕 CONFIGURACIÓN Y GENERACIÓN DE PDF
+   ========================================================= */
+function openPdfConfig() {
   if (state.pages.length === 0) {
     showToast('Agrega al menos una página', 'warning');
     return;
   }
-  showToast('🚧 Generación de PDF en Fase 5', 'warning');
+  // Asegurar que la página actual también se agregue si existe
+  if (state.currentPageData) {
+    state.pages.push(state.currentPageData);
+    state.currentPageData = null;
+  }
+  updatePdfPreview();
+  showScreen('screen-pdf-config');
+}
+
+function updatePdfPreview() {
+  const comp = PDF_COMPRESSION[currentPdfCompression];
+  let totalOriginalSize = 0;
+  let totalEstimatedSize = 0;
+  let estimatedSheets = 0;
+  
+  // Constantes A4
+  const A4_WIDTH_MM = 210;
+  const A4_HEIGHT_MM = 297;
+  const MARGIN_MM = 10;
+  const USABLE_WIDTH_MM = A4_WIDTH_MM - 2 * MARGIN_MM;  // 190mm
+  const USABLE_HEIGHT_MM = A4_HEIGHT_MM - 2 * MARGIN_MM; // 277mm
+  
+  let currentSheetUsedHeight = 0;
+  
+  state.pages.forEach(page => {
+    totalOriginalSize += page.blob.size;
+    
+    // Calcular dimensiones en mm de la imagen en el PDF
+    const aspectRatio = page.height / page.width;
+    const imgWidthMm = USABLE_WIDTH_MM;
+    const imgHeightMm = imgWidthMm * aspectRatio;
+    
+    // Estimar tamaño comprimido (factor empírico basado en calidad)
+    const compressionFactor = comp.quality * 0.6; // factor empírico
+    const estimatedPageKb = (page.blob.size / 1024) * compressionFactor;
+    totalEstimatedSize += estimatedPageKb * 1024;
+    
+    // Apilamiento vertical
+    if (currentSheetUsedHeight + imgHeightMm > USABLE_HEIGHT_MM) {
+      estimatedSheets++;
+      currentSheetUsedHeight = 0;
+    }
+    currentSheetUsedHeight += imgHeightMm;
+  });
+  
+  if (currentSheetUsedHeight > 0) estimatedSheets++;
+  
+  // Agregar overhead del PDF (~50KB base + 1KB por página)
+  totalEstimatedSize += 50 * 1024 + state.pages.length * 1024;
+  
+  document.getElementById('previewPages').textContent = state.pages.length;
+  document.getElementById('previewSheets').textContent = estimatedSheets;
+  document.getElementById('previewOriginalSize').textContent = formatBytes(totalOriginalSize);
+  document.getElementById('previewPdfSize').textContent = formatBytes(totalEstimatedSize);
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
+
+async function generateFinalPdf() {
+  if (state.pages.length === 0) {
+    showToast('No hay páginas para generar', 'warning');
+    return;
+  }
+  
+  try {
+    showLoading('Preparando PDF...', 5);
+    await new Promise(r => setTimeout(r, 50));
+    
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+    
+    const A4_WIDTH_MM = 210;
+    const A4_HEIGHT_MM = 297;
+    const MARGIN_MM = 10;
+    const USABLE_WIDTH_MM = A4_WIDTH_MM - 2 * MARGIN_MM;
+    const USABLE_HEIGHT_MM = A4_HEIGHT_MM - 2 * MARGIN_MM;
+    
+    const comp = PDF_COMPRESSION[currentPdfCompression];
+    let currentY = MARGIN_MM;
+    let isFirstPage = true;
+    
+    // Procesar cada página
+    for (let i = 0; i < state.pages.length; i++) {
+      const page = state.pages[i];
+      const progress = Math.round(((i + 1) / state.pages.length) * 90) + 5;
+      showLoading(`Procesando página ${i + 1} de ${state.pages.length}...`, progress);
+      await new Promise(r => setTimeout(r, 30));
+      
+      // Convertir blob a imagen y re-comprimir con calidad del PDF
+      const imgDataUrl = await blobToCompressedDataUrl(page.blob, comp.quality, comp.maxDim);
+      
+      // Calcular dimensiones en mm
+      const img = await loadImage(imgDataUrl);
+      const aspectRatio = img.height / img.width;
+      const imgWidthMm = USABLE_WIDTH_MM;
+      const imgHeightMm = imgWidthMm * aspectRatio;
+      
+      // Si no cabe en la hoja actual, agregar nueva hoja
+      if (currentY + imgHeightMm > A4_HEIGHT_MM - MARGIN_MM) {
+        pdf.addPage();
+        currentY = MARGIN_MM;
+      }
+      
+      // Agregar imagen al PDF
+      pdf.addImage(imgDataUrl, 'JPEG', MARGIN_MM, currentY, imgWidthMm, imgHeightMm, undefined, 'FAST');
+      
+      currentY += imgHeightMm + 3; // 3mm de espaciado entre imágenes
+    }
+    
+    showLoading('Finalizando PDF...', 98);
+    await new Promise(r => setTimeout(r, 50));
+    
+    // Obtener nombre del PDF
+    let pdfName = document.getElementById('pdfName').value.trim();
+    if (!pdfName) pdfName = `Documento_${Date.now()}`;
+    pdfName = pdfName.replace(/[^a-z0-9_\-]/gi, '_') + '.pdf';
+    
+    // Descargar automáticamente
+    pdf.save(pdfName);
+    
+    hideLoading();
+    showToast(`✅ PDF descargado: ${pdfName}`, 'success');
+    
+    // Preguntar si desea volver al inicio
+    setTimeout(() => {
+      showConfirm(
+        '¿Nuevo documento?',
+        'El PDF se ha descargado. ¿Deseas empezar un nuevo documento?',
+        'Nuevo documento',
+        () => { clearAllPages(); goHome(); }
+      );
+    }, 500);
+    
+  } catch (err) {
+    console.error(err);
+    hideLoading();
+    showToast('Error al generar PDF: ' + err.message, 'error');
+  }
+}
+
+// Helper: convertir blob a dataURL comprimido
+function blobToCompressedDataUrl(blob, quality, maxDim) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const maxOriginal = Math.max(img.width, img.height);
+      let newW = img.width, newH = img.height;
+      if (maxOriginal > maxDim) {
+        const scale = maxDim / maxOriginal;
+        newW = Math.round(img.width * scale);
+        newH = Math.round(img.height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = newW; canvas.height = newH;
+      canvas.getContext('2d').drawImage(img, 0, 0, newW, newH);
+      const dataUrl = canvas.toDataURL('image/jpeg', quality);
+      URL.revokeObjectURL(url);
+      resolve(dataUrl);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Error al procesar imagen')); };
+    img.src = url;
+  });
+}
+
+// Helper: cargar imagen desde dataURL
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
 /* =========================================================
@@ -1423,9 +1587,7 @@ document.getElementById('confirmOkBtn').addEventListener('click', () => {
    ========================================================= */
 function showLoading(text, progress) {
   document.getElementById('loadingText').textContent = text || 'Procesando...';
-  if (progress !== undefined) {
-    document.getElementById('loadingBar').style.width = progress + '%';
-  }
+  if (progress !== undefined) document.getElementById('loadingBar').style.width = progress + '%';
   document.getElementById('loadingOverlay').classList.add('active');
 }
 function hideLoading() {
@@ -1441,9 +1603,7 @@ function showToast(msg, type = '') {
 }
 
 window.addEventListener('resize', () => {
-  if (document.getElementById('screen-editor').classList.contains('active')) {
-    drawEditor();
-  }
+  if (document.getElementById('screen-editor').classList.contains('active')) drawEditor();
 });
 </script>
 
