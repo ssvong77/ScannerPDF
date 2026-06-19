@@ -7,568 +7,314 @@
 <title>ScanLens - Escáner de Documentos</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
   :root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --surface-light: #334155;
-    --text: #f1f5f9;
-    --text-dim: #94a3b8;
-    --success: #10b981;
-    --danger: #ef4444;
-    --warning: #f59e0b;
+    --primary: #2563eb; --primary-dark: #1d4ed8;
+    --bg: #0f172a; --surface: #1e293b; --surface-light: #334155;
+    --text: #f1f5f9; --text-dim: #94a3b8;
+    --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
   }
-  
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-    -webkit-user-select: none;
-    user-select: none;
+    background: var(--bg); color: var(--text);
+    min-height: 100vh; overflow-x: hidden;
+    -webkit-user-select: none; user-select: none;
   }
-  
   .screen { display: none; min-height: 100vh; flex-direction: column; }
   .screen.active { display: flex; }
-  
   .header {
-    background: var(--surface);
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    background: var(--surface); padding: 16px 20px;
+    display: flex; align-items: center; gap: 12px;
     border-bottom: 1px solid var(--surface-light);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: sticky; top: 0; z-index: 100;
   }
   .header h1 { font-size: 18px; font-weight: 600; flex: 1; }
   .header .page-count {
-    background: var(--primary);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
+    background: var(--primary); color: white;
+    padding: 4px 10px; border-radius: 12px;
+    font-size: 13px; font-weight: 600;
   }
   .btn-back {
-    background: none;
-    border: none;
-    color: var(--text);
-    font-size: 24px;
-    cursor: pointer;
-    padding: 4px 8px;
+    background: none; border: none; color: var(--text);
+    font-size: 24px; cursor: pointer; padding: 4px 8px;
   }
-  
   .home {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
-    gap: 24px;
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 24px; gap: 24px;
   }
   .logo { font-size: 64px; margin-bottom: -16px; }
   .home h2 { font-size: 28px; font-weight: 700; text-align: center; }
-  .home p {
-    color: var(--text-dim);
-    text-align: center;
-    max-width: 320px;
-    line-height: 1.5;
-  }
+  .home p { color: var(--text-dim); text-align: center; max-width: 320px; line-height: 1.5; }
   .capture-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-    max-width: 320px;
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%; max-width: 320px;
   }
   .btn-capture {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 18px;
-    border-radius: 16px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    transition: transform 0.1s;
+    background: var(--primary); color: white; border: none;
+    padding: 18px; border-radius: 16px; font-size: 16px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center;
+    justify-content: center; gap: 12px; transition: transform 0.1s;
   }
   .btn-capture:active { transform: scale(0.97); }
-  .btn-capture.secondary {
-    background: var(--surface);
-    border: 2px solid var(--surface-light);
-  }
+  .btn-capture.secondary { background: var(--surface); border: 2px solid var(--surface-light); }
   .btn-capture.multi {
-    background: var(--surface);
-    border: 2px dashed var(--primary);
-    color: var(--primary);
+    background: var(--surface); border: 2px dashed var(--primary); color: var(--primary);
   }
   .btn-capture .icon { font-size: 22px; }
-  .btn-capture .subtitle {
-    font-size: 11px;
-    opacity: 0.8;
-    font-weight: 400;
-    margin-top: 2px;
-  }
-  
+  .btn-capture .subtitle { font-size: 11px; opacity: 0.8; font-weight: 400; margin-top: 2px; }
   .quality-selector {
-    width: 100%;
-    max-width: 320px;
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 14px;
+    width: 100%; max-width: 320px; background: var(--surface);
+    border-radius: 12px; padding: 14px;
   }
   .quality-selector label {
-    display: block;
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    font-weight: 500;
+    display: block; font-size: 12px; color: var(--text-dim);
+    margin-bottom: 8px; font-weight: 500;
   }
   .quality-options { display: flex; gap: 6px; }
   .quality-option {
-    flex: 1;
-    background: var(--surface-light);
-    border: 2px solid transparent;
-    border-radius: 10px;
-    padding: 10px 6px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
+    flex: 1; background: var(--surface-light);
+    border: 2px solid transparent; border-radius: 10px;
+    padding: 10px 6px; text-align: center;
+    cursor: pointer; transition: all 0.2s;
   }
-  .quality-option.active {
-    border-color: var(--primary);
-    background: rgba(37, 99, 235, 0.2);
-  }
+  .quality-option.active { border-color: var(--primary); background: rgba(37, 99, 235, 0.2); }
   .quality-option .icon { font-size: 18px; display: block; margin-bottom: 2px; }
   .quality-option .name { font-size: 11px; font-weight: 600; color: var(--text); }
   .quality-option .desc { font-size: 9px; color: var(--text-dim); margin-top: 2px; }
-  
-  .editor-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-  }
+  .editor-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
   .canvas-wrapper {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    overflow: hidden;
+    flex: 1; position: relative; display: flex;
+    align-items: center; justify-content: center;
+    background: #000; overflow: hidden;
   }
-  #editorCanvas {
-    max-width: 100%;
-    max-height: 100%;
-    display: block;
-    touch-action: none;
-  }
+  #editorCanvas { max-width: 100%; max-height: 100%; display: block; touch-action: none; }
   .editor-hint {
-    position: absolute;
-    top: 12px;
-    left: 50%;
+    position: absolute; top: 12px; left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.75);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 13px;
-    pointer-events: none;
-    z-index: 10;
+    background: rgba(0,0,0,0.75); color: white;
+    padding: 8px 16px; border-radius: 20px;
+    font-size: 13px; pointer-events: none; z-index: 10;
     backdrop-filter: blur(8px);
   }
   .editor-counter {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: var(--primary);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-    z-index: 10;
+    position: absolute; top: 12px; right: 12px;
+    background: var(--primary); color: white;
+    padding: 6px 12px; border-radius: 16px;
+    font-size: 12px; font-weight: 600; z-index: 10;
   }
   .editor-toolbar {
-    background: var(--surface);
-    padding: 12px;
-    display: flex;
-    gap: 8px;
-    justify-content: space-around;
+    background: var(--surface); padding: 12px;
+    display: flex; gap: 8px; justify-content: space-around;
     border-top: 1px solid var(--surface-light);
   }
   .tool-btn {
-    background: var(--surface-light);
-    color: var(--text);
-    border: none;
-    padding: 12px 10px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    flex: 1;
-    justify-content: center;
+    background: var(--surface-light); color: var(--text);
+    border: none; padding: 12px 10px; border-radius: 10px;
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    flex: 1; justify-content: center;
   }
   .tool-btn.primary { background: var(--primary); }
   .tool-btn.success { background: var(--success); }
   .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  
   .result-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px;
-    gap: 16px;
-    overflow-y: auto;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 16px; gap: 16px; overflow-y: auto;
   }
   .result-image {
-    max-width: 100%;
-    max-height: 50vh;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-    background: white;
+    max-width: 100%; max-height: 50vh; border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5); background: white;
   }
   .result-info {
-    background: var(--surface);
-    padding: 16px;
-    border-radius: 12px;
-    width: 100%;
-    font-size: 14px;
-    color: var(--text-dim);
-    line-height: 1.6;
+    background: var(--surface); padding: 16px;
+    border-radius: 12px; width: 100%;
+    font-size: 14px; color: var(--text-dim); line-height: 1.6;
   }
   .result-info strong { color: var(--text); }
-  .result-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
+  .result-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   .result-actions button { width: 100%; }
   .btn-add { background: var(--success); color: white; }
   .btn-finish { background: var(--primary); color: white; }
   .btn-download-single { background: var(--surface); color: var(--text); border: 1px solid var(--surface-light); }
-  
   .gallery-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .gallery-info {
-    padding: 14px 20px;
-    background: var(--surface);
+    padding: 14px 20px; background: var(--surface);
     border-bottom: 1px solid var(--surface-light);
-    font-size: 13px;
-    color: var(--text-dim);
+    font-size: 13px; color: var(--text-dim);
   }
   .gallery-info strong { color: var(--text); }
   .gallery-list {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 12px;
   }
   .page-item {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: grab;
-    transition: transform 0.15s, box-shadow 0.15s;
+    background: var(--surface); border-radius: 12px; padding: 12px;
+    display: flex; align-items: center; gap: 12px;
+    cursor: grab; transition: transform 0.15s, box-shadow 0.15s;
     border: 2px solid transparent;
   }
   .page-item:active { cursor: grabbing; }
   .page-item.sortable-ghost { opacity: 0.4; border-color: var(--primary); }
   .page-item.sortable-chosen { box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3); }
   .page-thumb {
-    width: 60px;
-    height: 80px;
-    border-radius: 6px;
-    object-fit: cover;
-    background: white;
-    flex-shrink: 0;
+    width: 60px; height: 80px; border-radius: 6px;
+    object-fit: cover; background: white; flex-shrink: 0;
   }
   .page-info { flex: 1; min-width: 0; }
   .page-number { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
   .page-meta { font-size: 12px; color: var(--text-dim); }
   .page-actions { display: flex; flex-direction: column; gap: 6px; }
   .page-btn {
-    background: var(--surface-light);
-    border: none;
-    color: var(--text);
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: var(--surface-light); border: none; color: var(--text);
+    width: 36px; height: 36px; border-radius: 8px;
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
   }
   .page-btn.danger { background: var(--danger); }
   .gallery-footer {
-    background: var(--surface);
-    padding: 12px;
+    background: var(--surface); padding: 12px;
     border-top: 1px solid var(--surface-light);
-    display: flex;
-    gap: 8px;
+    display: flex; gap: 8px;
   }
   .gallery-footer button { flex: 1; padding: 14px; font-size: 14px; }
   .btn-add-more { background: var(--success); color: white; font-weight: 600; }
   .btn-generate { background: var(--primary); color: white; font-weight: 600; }
   .gallery-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    text-align: center;
-    color: var(--text-dim);
-    gap: 16px;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 40px 20px; text-align: center;
+    color: var(--text-dim); gap: 16px;
   }
   .gallery-empty .icon { font-size: 48px; }
-  
-  /* 🆕 PANTALLA CONFIGURACIÓN PDF */
   .pdf-config-container {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    flex: 1; padding: 20px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 16px;
   }
   .config-section {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 16px;
+    background: var(--surface); border-radius: 12px; padding: 16px;
   }
   .config-section h3 {
-    font-size: 14px;
-    margin-bottom: 12px;
-    color: var(--text);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 14px; margin-bottom: 12px; color: var(--text);
+    display: flex; align-items: center; gap: 8px;
   }
   .config-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--surface-light);
-    color: var(--text);
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 15px;
-    outline: none;
+    width: 100%; background: var(--bg);
+    border: 1px solid var(--surface-light); color: var(--text);
+    padding: 12px; border-radius: 8px; font-size: 15px; outline: none;
   }
   .config-input:focus { border-color: var(--primary); }
-  
-  .compression-presets {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  .compression-presets { display: flex; flex-direction: column; gap: 8px; }
   .compression-preset {
-    background: var(--bg);
-    border: 2px solid var(--surface-light);
-    border-radius: 10px;
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    background: var(--bg); border: 2px solid var(--surface-light);
+    border-radius: 10px; padding: 12px; cursor: pointer;
+    transition: all 0.2s; display: flex; align-items: center; gap: 12px;
   }
-  .compression-preset.active {
-    border-color: var(--primary);
-    background: rgba(37, 99, 235, 0.1);
-  }
-  .compression-preset .preset-icon {
-    font-size: 24px;
-    width: 40px;
-    text-align: center;
-  }
+  .compression-preset.active { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
+  .compression-preset .preset-icon { font-size: 24px; width: 40px; text-align: center; }
   .compression-preset .preset-info { flex: 1; }
-  .compression-preset .preset-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text);
-  }
-  .compression-preset .preset-desc {
-    font-size: 11px;
-    color: var(--text-dim);
-    margin-top: 2px;
-  }
-  .compression-preset .preset-quality {
-    font-size: 12px;
-    color: var(--primary);
-    font-weight: 600;
-  }
-  
+  .compression-preset .preset-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .compression-preset .preset-desc { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .compression-preset .preset-quality { font-size: 12px; color: var(--primary); font-weight: 600; }
   .pdf-preview {
-    background: var(--bg);
-    border-radius: 10px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    background: var(--bg); border-radius: 10px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px;
   }
   .preview-row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 13px;
-    color: var(--text-dim);
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--text-dim);
   }
   .preview-row strong { color: var(--text); }
   .preview-row.highlight strong { color: var(--success); }
-  
   .pdf-config-footer {
-    background: var(--surface);
-    padding: 12px;
+    background: var(--surface); padding: 12px;
     border-top: 1px solid var(--surface-light);
-    display: flex;
-    gap: 8px;
+    display: flex; gap: 8px;
   }
   .pdf-config-footer button { flex: 1; padding: 14px; font-size: 15px; }
   .btn-back-config { background: var(--surface-light); color: var(--text); }
   .btn-generate-final { background: var(--success); color: white; font-weight: 600; }
-  
   .loading-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-    z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px; z-index: 1000;
     backdrop-filter: blur(4px);
   }
   .loading-overlay.active { display: flex; }
   .spinner {
-    width: 48px;
-    height: 48px;
+    width: 48px; height: 48px;
     border: 4px solid var(--surface-light);
-    border-top-color: var(--primary);
-    border-radius: 50%;
+    border-top-color: var(--primary); border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text {
-    color: white;
-    font-size: 15px;
-    text-align: center;
-    max-width: 280px;
+    color: white; font-size: 15px;
+    text-align: center; max-width: 280px;
   }
   .loading-progress {
-    width: 200px;
-    height: 4px;
+    width: 200px; height: 4px;
     background: var(--surface-light);
-    border-radius: 2px;
-    overflow: hidden;
+    border-radius: 2px; overflow: hidden;
   }
   .loading-progress-bar {
-    height: 100%;
-    background: var(--primary);
-    width: 0%;
-    transition: width 0.3s;
+    height: 100%; background: var(--primary);
+    width: 0%; transition: width 0.3s;
   }
-  
   .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
+    position: fixed; bottom: 24px; left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: var(--surface);
-    color: var(--text);
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-size: 14px;
+    background: var(--surface); color: var(--text);
+    padding: 12px 20px; border-radius: 12px; font-size: 14px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    transition: transform 0.3s;
-    z-index: 2000;
+    transition: transform 0.3s; z-index: 2000;
     border-left: 4px solid var(--primary);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
   .toast.error { border-left-color: var(--danger); }
   .toast.success { border-left-color: var(--success); }
   .toast.warning { border-left-color: var(--warning); }
-  
   .confirm-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1500;
-    padding: 20px;
-    backdrop-filter: blur(4px);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1500; padding: 20px; backdrop-filter: blur(4px);
   }
   .confirm-overlay.active { display: flex; }
   .confirm-box {
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 320px;
-    width: 100%;
-    text-align: center;
+    background: var(--surface); border-radius: 16px;
+    padding: 24px; max-width: 320px; width: 100%; text-align: center;
   }
   .confirm-box h3 { margin-bottom: 12px; font-size: 18px; }
   .confirm-box p { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
   .confirm-actions { display: flex; gap: 10px; }
-  .confirm-actions button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+  .confirm-actions button {
+    flex: 1; padding: 12px; border-radius: 10px;
+    border: none; font-weight: 600; cursor: pointer; font-size: 14px;
+  }
   .confirm-cancel { background: var(--surface-light); color: var(--text); }
   .confirm-ok { background: var(--danger); color: white; }
 </style>
 </head>
 <body>
 
-<!-- PANTALLA INICIO -->
 <div id="screen-home" class="screen active">
   <div class="home">
     <div class="logo">📄</div>
     <h2>ScanLens</h2>
     <p>Escáner de documentos con corrección de perspectiva</p>
-    
     <div class="quality-selector">
       <label>Calidad de procesamiento:</label>
       <div class="quality-options">
         <div class="quality-option active" data-quality="fast" onclick="setQuality('fast')">
-          <span class="icon">⚡</span>
-          <div class="name">Rápido</div>
-          <div class="desc">600px</div>
+          <span class="icon">⚡</span><div class="name">Rápido</div><div class="desc">600px</div>
         </div>
         <div class="quality-option" data-quality="balanced" onclick="setQuality('balanced')">
-          <span class="icon">⚖️</span>
-          <div class="name">Normal</div>
-          <div class="desc">1000px</div>
+          <span class="icon">⚖️</span><div class="name">Normal</div><div class="desc">1000px</div>
         </div>
         <div class="quality-option" data-quality="high" onclick="setQuality('high')">
-          <span class="icon">🎯</span>
-          <div class="name">Alta</div>
-          <div class="desc">1500px</div>
+          <span class="icon">🎯</span><div class="name">Alta</div><div class="desc">1500px</div>
         </div>
       </div>
     </div>
-    
     <div class="capture-buttons">
       <button class="btn-capture" onclick="captureFromCamera()">
         <span class="icon">📷</span> Tomar Foto
@@ -587,7 +333,6 @@
   </div>
 </div>
 
-<!-- PANTALLA EDITOR -->
 <div id="screen-editor" class="screen">
   <div class="header">
     <button class="btn-back" onclick="cancelEditor()">←</button>
@@ -596,9 +341,7 @@
   <div class="editor-container">
     <div class="editor-hint">Arrastra los puntos a las esquinas del documento</div>
     <div class="editor-counter" id="editorCounter"></div>
-    <div class="canvas-wrapper">
-      <canvas id="editorCanvas"></canvas>
-    </div>
+    <div class="canvas-wrapper"><canvas id="editorCanvas"></canvas></div>
     <div class="editor-toolbar">
       <button class="tool-btn" onclick="resetCorners()">🔄 Reset</button>
       <button class="tool-btn" onclick="skipCorrection()">⏭️ Sin corrección</button>
@@ -607,7 +350,6 @@
   </div>
 </div>
 
-<!-- PANTALLA RESULTADO -->
 <div id="screen-result" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backFromResult()">←</button>
@@ -618,20 +360,13 @@
     <img id="resultImage" class="result-image" alt="Resultado">
     <div class="result-info" id="resultInfo"></div>
     <div class="result-actions">
-      <button class="tool-btn btn-add" onclick="addAnotherPage()">
-        📄 Agregar otra página
-      </button>
-      <button class="tool-btn btn-finish" onclick="finishDocument()">
-        ✅ Terminar documento
-      </button>
-      <button class="tool-btn btn-download-single" onclick="downloadSinglePage()">
-        💾 Descargar solo esta página
-      </button>
+      <button class="tool-btn btn-add" onclick="addAnotherPage()">📄 Agregar otra página</button>
+      <button class="tool-btn btn-finish" onclick="finishDocument()">✅ Terminar documento</button>
+      <button class="tool-btn btn-download-single" onclick="downloadSinglePage()">💾 Descargar solo esta página</button>
     </div>
   </div>
 </div>
 
-<!-- PANTALLA GALERÍA -->
 <div id="screen-gallery" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backFromGallery()">←</button>
@@ -639,9 +374,7 @@
     <span class="page-count" id="galleryPageCount">0</span>
   </div>
   <div class="gallery-container">
-    <div class="gallery-info">
-      <strong>Arrastra</strong> para reordenar. El orden se mantendrá en el PDF.
-    </div>
+    <div class="gallery-info"><strong>Arrastra</strong> para reordenar. El orden se mantendrá en el PDF.</div>
     <div class="gallery-list" id="galleryList"></div>
     <div class="gallery-footer">
       <button class="tool-btn btn-add-more" onclick="addMorePages()">➕ Agregar más</button>
@@ -650,7 +383,6 @@
   </div>
 </div>
 
-<!-- 🆕 PANTALLA CONFIGURACIÓN PDF -->
 <div id="screen-pdf-config" class="screen">
   <div class="header">
     <button class="btn-back" onclick="backToGallery()">←</button>
@@ -661,7 +393,6 @@
       <h3>📝 Nombre del documento</h3>
       <input type="text" class="config-input" id="pdfName" placeholder="Mi documento" value="">
     </div>
-    
     <div class="config-section">
       <h3>🗜️ Compresión del PDF</h3>
       <div class="compression-presets">
@@ -691,34 +422,15 @@
         </div>
       </div>
     </div>
-    
     <div class="config-section">
       <h3>📊 Vista previa</h3>
       <div class="pdf-preview" id="pdfPreview">
-        <div class="preview-row">
-          <span>Páginas:</span>
-          <strong id="previewPages">0</strong>
-        </div>
-        <div class="preview-row">
-          <span>Hojas A4 estimadas:</span>
-          <strong id="previewSheets">0</strong>
-        </div>
-        <div class="preview-row">
-          <span>Tamaño original:</span>
-          <strong id="previewOriginalSize">0 KB</strong>
-        </div>
-        <div class="preview-row highlight">
-          <span>Tamaño estimado PDF:</span>
-          <strong id="previewPdfSize">0 KB</strong>
-        </div>
-        <div class="preview-row">
-          <span>Formato:</span>
-          <strong>A4 (210 × 297 mm)</strong>
-        </div>
-        <div class="preview-row">
-          <span>Márgenes:</span>
-          <strong>10 mm</strong>
-        </div>
+        <div class="preview-row"><span>Páginas:</span><strong id="previewPages">0</strong></div>
+        <div class="preview-row"><span>Hojas A4 estimadas:</span><strong id="previewSheets">0</strong></div>
+        <div class="preview-row"><span>Tamaño original:</span><strong id="previewOriginalSize">0 KB</strong></div>
+        <div class="preview-row highlight"><span>Tamaño estimado PDF:</span><strong id="previewPdfSize">0 KB</strong></div>
+        <div class="preview-row"><span>Formato:</span><strong>A4 (210 × 297 mm)</strong></div>
+        <div class="preview-row"><span>Márgenes:</span><strong>10 mm</strong></div>
       </div>
     </div>
   </div>
@@ -728,7 +440,6 @@
   </div>
 </div>
 
-<!-- LOADING -->
 <div id="loadingOverlay" class="loading-overlay">
   <div class="spinner"></div>
   <div class="loading-text" id="loadingText">Procesando...</div>
@@ -753,12 +464,11 @@
 <input type="file" id="multiFileInput" accept="image/*" multiple style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-<!-- 🆕 jsPDF para generación de PDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
 /* =========================================================
-   MOTOR DE HOMOGRAFÍA (JS PURO)
+   MOTOR DE HOMOGRAFÍA
    ========================================================= */
 const Homography = {
   solveLinearSystem(A, b) {
@@ -789,10 +499,8 @@ const Homography = {
     for (let i = 0; i < 4; i++) {
       const sx = src[i].x, sy = src[i].y;
       const dx = dst[i].x, dy = dst[i].y;
-      A.push([sx, sy, 1, 0, 0, 0, -dx*sx, -dx*sy]);
-      b.push(dx);
-      A.push([0, 0, 0, sx, sy, 1, -dy*sx, -dy*sy]);
-      b.push(dy);
+      A.push([sx, sy, 1, 0, 0, 0, -dx*sx, -dx*sy]); b.push(dx);
+      A.push([0, 0, 0, sx, sy, 1, -dy*sx, -dy*sy]); b.push(dy);
     }
     const h = this.solveLinearSystem(A, b);
     if (!h) return null;
@@ -837,7 +545,7 @@ const Homography = {
 };
 
 /* =========================================================
-   CONFIGURACIÓN DE CALIDAD (para captura)
+   CONFIGURACIÓN DE CALIDAD
    ========================================================= */
 const QUALITY_PRESETS = {
   fast: { maxDim: 600, jpegQuality: 0.82, label: 'Rápido (600px)' },
@@ -856,7 +564,7 @@ const savedQuality = localStorage.getItem('scanlens_quality');
 if (savedQuality && QUALITY_PRESETS[savedQuality]) setQuality(savedQuality);
 
 /* =========================================================
-   🆕 CONFIGURACIÓN DE COMPRESIÓN PDF
+   CONFIGURACIÓN DE COMPRESIÓN PDF
    ========================================================= */
 const PDF_COMPRESSION = {
   high: { quality: 0.90, maxDim: 1800, label: 'Alta calidad (90%)' },
@@ -864,7 +572,6 @@ const PDF_COMPRESSION = {
   max: { quality: 0.50, maxDim: 1000, label: 'Máxima compresión (50%)' }
 };
 let currentPdfCompression = 'balanced';
-
 function setPdfCompression(level) {
   currentPdfCompression = level;
   document.querySelectorAll('.compression-preset').forEach(el => {
@@ -894,7 +601,6 @@ const canvas = document.getElementById('editorCanvas');
 const ctx = canvas.getContext('2d');
 let sortableInstance = null;
 
-// Nombre por defecto del PDF
 document.getElementById('pdfName').value = `Documento_${new Date().toISOString().slice(0,10)}`;
 
 /* =========================================================
@@ -1372,14 +1078,42 @@ function clearAllPages() {
 }
 
 /* =========================================================
-   🆕 CONFIGURACIÓN Y GENERACIÓN DE PDF
+   🆕 CONFIGURACIÓN Y GENERACIÓN DE PDF (CON LOS 3 FIXES)
    ========================================================= */
+
+// Constantes globales del PDF
+const PDF = {
+  A4_WIDTH_MM: 210,
+  A4_HEIGHT_MM: 297,
+  MARGIN_MM: 10,
+  SPACING_MM: 3,
+  get USABLE_WIDTH_MM() { return this.A4_WIDTH_MM - 2 * this.MARGIN_MM; },   // 190
+  get USABLE_HEIGHT_MM() { return this.A4_HEIGHT_MM - 2 * this.MARGIN_MM; } // 277
+};
+
+// 🆕 Función auxiliar: calcular dimensiones de imagen respetando AMBOS límites (contain)
+function calculateImageDimensions(imgWidth, imgHeight, maxW, maxH) {
+  const aspectRatio = imgHeight / imgWidth;
+  let w, h;
+  
+  if (aspectRatio > maxH / maxW) {
+    // Imagen muy vertical → limitar por ALTO
+    h = maxH;
+    w = maxH / aspectRatio;
+  } else {
+    // Imagen horizontal o normal → limitar por ANCHO
+    w = maxW;
+    h = maxW * aspectRatio;
+  }
+  
+  return { width: w, height: h };
+}
+
 function openPdfConfig() {
   if (state.pages.length === 0) {
     showToast('Agrega al menos una página', 'warning');
     return;
   }
-  // Asegurar que la página actual también se agregue si existe
   if (state.currentPageData) {
     state.pages.push(state.currentPageData);
     state.currentPageData = null;
@@ -1388,45 +1122,37 @@ function openPdfConfig() {
   showScreen('screen-pdf-config');
 }
 
+// 🆕 Vista previa actualizada con la nueva lógica de contain
 function updatePdfPreview() {
   const comp = PDF_COMPRESSION[currentPdfCompression];
   let totalOriginalSize = 0;
   let totalEstimatedSize = 0;
   let estimatedSheets = 0;
   
-  // Constantes A4
-  const A4_WIDTH_MM = 210;
-  const A4_HEIGHT_MM = 297;
-  const MARGIN_MM = 10;
-  const USABLE_WIDTH_MM = A4_WIDTH_MM - 2 * MARGIN_MM;  // 190mm
-  const USABLE_HEIGHT_MM = A4_HEIGHT_MM - 2 * MARGIN_MM; // 277mm
+  let currentY = PDF.MARGIN_MM;
   
-  let currentSheetUsedHeight = 0;
-  
-  state.pages.forEach(page => {
+  state.pages.forEach((page, idx) => {
     totalOriginalSize += page.blob.size;
     
-    // Calcular dimensiones en mm de la imagen en el PDF
-    const aspectRatio = page.height / page.width;
-    const imgWidthMm = USABLE_WIDTH_MM;
-    const imgHeightMm = imgWidthMm * aspectRatio;
+    // Calcular dimensiones con contain (igual que en el PDF real)
+    const dims = calculateImageDimensions(page.width, page.height, PDF.USABLE_WIDTH_MM, PDF.USABLE_HEIGHT_MM);
     
-    // Estimar tamaño comprimido (factor empírico basado en calidad)
-    const compressionFactor = comp.quality * 0.6; // factor empírico
+    // Si no cabe en la hoja actual, agregar nueva hoja
+    if (idx > 0 && currentY + dims.height > PDF.A4_HEIGHT_MM - PDF.MARGIN_MM) {
+      estimatedSheets++;
+      currentY = PDF.MARGIN_MM;
+    }
+    currentY += dims.height + PDF.SPACING_MM;
+    
+    // Estimar tamaño comprimido
+    const compressionFactor = comp.quality * 0.6;
     const estimatedPageKb = (page.blob.size / 1024) * compressionFactor;
     totalEstimatedSize += estimatedPageKb * 1024;
-    
-    // Apilamiento vertical
-    if (currentSheetUsedHeight + imgHeightMm > USABLE_HEIGHT_MM) {
-      estimatedSheets++;
-      currentSheetUsedHeight = 0;
-    }
-    currentSheetUsedHeight += imgHeightMm;
   });
   
-  if (currentSheetUsedHeight > 0) estimatedSheets++;
+  if (state.pages.length > 0) estimatedSheets++;
   
-  // Agregar overhead del PDF (~50KB base + 1KB por página)
+  // Overhead del PDF
   totalEstimatedSize += 50 * 1024 + state.pages.length * 1024;
   
   document.getElementById('previewPages').textContent = state.pages.length;
@@ -1441,6 +1167,7 @@ function formatBytes(bytes) {
   return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
 }
 
+// 🆕 FUNCIÓN PRINCIPAL CON LOS 3 FIXES APLICADOS
 async function generateFinalPdf() {
   if (state.pages.length === 0) {
     showToast('No hay páginas para generar', 'warning');
@@ -1458,51 +1185,46 @@ async function generateFinalPdf() {
       format: 'a4'
     });
     
-    const A4_WIDTH_MM = 210;
-    const A4_HEIGHT_MM = 297;
-    const MARGIN_MM = 10;
-    const USABLE_WIDTH_MM = A4_WIDTH_MM - 2 * MARGIN_MM;
-    const USABLE_HEIGHT_MM = A4_HEIGHT_MM - 2 * MARGIN_MM;
-    
     const comp = PDF_COMPRESSION[currentPdfCompression];
-    let currentY = MARGIN_MM;
-    let isFirstPage = true;
+    let currentY = PDF.MARGIN_MM;
     
-    // Procesar cada página
     for (let i = 0; i < state.pages.length; i++) {
       const page = state.pages[i];
       const progress = Math.round(((i + 1) / state.pages.length) * 90) + 5;
       showLoading(`Procesando página ${i + 1} de ${state.pages.length}...`, progress);
       await new Promise(r => setTimeout(r, 30));
       
-      // Convertir blob a imagen y re-comprimir con calidad del PDF
+      // Convertir blob a imagen comprimida
       const imgDataUrl = await blobToCompressedDataUrl(page.blob, comp.quality, comp.maxDim);
-      
-      // Calcular dimensiones en mm
       const img = await loadImage(imgDataUrl);
-      const aspectRatio = img.height / img.width;
-      const imgWidthMm = USABLE_WIDTH_MM;
-      const imgHeightMm = imgWidthMm * aspectRatio;
       
-      // Si no cabe en la hoja actual, agregar nueva hoja
-      if (currentY + imgHeightMm > A4_HEIGHT_MM - MARGIN_MM) {
+      // 🔧 FIX #2: Calcular dimensiones respetando AMBOS límites (contain)
+      const dims = calculateImageDimensions(img.width, img.height, PDF.USABLE_WIDTH_MM, PDF.USABLE_HEIGHT_MM);
+      
+      // 🔧 FIX #1: Verificar si cabe en la página actual
+      // Para la primera imagen, SIEMPRE cabe porque calculateImageDimensions
+      // garantiza que las dimensiones son <= al área útil
+      if (i > 0 && currentY + dims.height > PDF.A4_HEIGHT_MM - PDF.MARGIN_MM) {
         pdf.addPage();
-        currentY = MARGIN_MM;
+        currentY = PDF.MARGIN_MM;
       }
       
-      // Agregar imagen al PDF
-      pdf.addImage(imgDataUrl, 'JPEG', MARGIN_MM, currentY, imgWidthMm, imgHeightMm, undefined, 'FAST');
+      // 🔧 FIX #3: Centrar horizontalmente
+      const xOffset = PDF.MARGIN_MM + (PDF.USABLE_WIDTH_MM - dims.width) / 2;
       
-      currentY += imgHeightMm + 3; // 3mm de espaciado entre imágenes
+      // Agregar imagen al PDF
+      pdf.addImage(imgDataUrl, 'JPEG', xOffset, currentY, dims.width, dims.height, undefined, 'FAST');
+      
+      currentY += dims.height + PDF.SPACING_MM;
     }
     
     showLoading('Finalizando PDF...', 98);
     await new Promise(r => setTimeout(r, 50));
     
-    // Obtener nombre del PDF
+    // Nombre del PDF
     let pdfName = document.getElementById('pdfName').value.trim();
     if (!pdfName) pdfName = `Documento_${Date.now()}`;
-    pdfName = pdfName.replace(/[^a-z0-9_\-]/gi, '_') + '.pdf';
+    pdfName = pdfName.replace(/[^a-z0-9_\-áéíóúñ\s]/gi, '_').replace(/\s+/g, '_') + '.pdf';
     
     // Descargar automáticamente
     pdf.save(pdfName);
@@ -1510,7 +1232,6 @@ async function generateFinalPdf() {
     hideLoading();
     showToast(`✅ PDF descargado: ${pdfName}`, 'success');
     
-    // Preguntar si desea volver al inicio
     setTimeout(() => {
       showConfirm(
         '¿Nuevo documento?',
@@ -1527,7 +1248,6 @@ async function generateFinalPdf() {
   }
 }
 
-// Helper: convertir blob a dataURL comprimido
 function blobToCompressedDataUrl(blob, quality, maxDim) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(blob);
@@ -1552,7 +1272,6 @@ function blobToCompressedDataUrl(blob, quality, maxDim) {
   });
 }
 
-// Helper: cargar imagen desde dataURL
 function loadImage(src) {
   return new Promise((resolve, reject) => {
     const img = new Image();
