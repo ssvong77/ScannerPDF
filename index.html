@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#2563eb">
+<title>ScanLens - Escáner de Documentos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-light: #334155;
+    --text: #f1f5f9;
+    --text-dim: #94a3b8;
+    --success: #10b981;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+  }
+  
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+  
+  .header {
+    background: var(--surface);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--surface-light);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 { font-size: 18px; font-weight: 600; flex: 1; }
+  .header .page-count {
+    background: var(--primary);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .btn-back {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+  
+  .home {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    gap: 24px;
+  }
+  .logo { font-size: 64px; margin-bottom: -16px; }
+  .home h2 { font-size: 28px; font-weight: 700; text-align: center; }
+  .home p {
+    color: var(--text-dim);
+    text-align: center;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+  .capture-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .btn-capture {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 20px;
+    border-radius: 16px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: transform 0.1s;
+  }
+  .btn-capture:active { transform: scale(0.97); }
+  .btn-capture.secondary {
+    background: var(--surface);
+    border: 2px solid var(--surface-light);
+  }
+  .btn-capture .icon { font-size: 24px; }
+  
+  /* 🆕 SELECTOR DE CALIDAD */
+  .quality-selector {
+    width: 100%;
+    max-width: 320px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .quality-selector label {
+    display: block;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+  .quality-options {
+    display: flex;
+    gap: 8px;
+  }
+  .quality-option {
+    flex: 1;
+    background: var(--surface-light);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .quality-option.active {
+    border-color: var(--primary);
+    background: rgba(37, 99, 235, 0.2);
+  }
+  .quality-option .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .quality-option .name { font-size: 12px; font-weight: 600; color: var(--text); }
+  .quality-option .desc { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+  
+  #cvStatusHome {
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: center;
+  }
+  
+  .editor-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .canvas-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+    overflow: hidden;
+  }
+  #editorCanvas {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    touch-action: none;
+  }
+  .editor-hint {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.75);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+  .editor-toolbar {
+    background: var(--surface);
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    justify-content: space-around;
+    border-top: 1px solid var(--surface-light);
+  }
+  .tool-btn {
+    background: var(--surface-light);
+    color: var(--text);
+    border: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+  }
+  .tool-btn.primary { background: var(--primary); }
+  .tool-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  .result-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+  .result-image {
+    max-width: 100%;
+    max-height: 50vh;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    background: white;
+  }
+  .result-info {
+    background: var(--surface);
+    padding: 16px;
+    border-radius: 12px;
+    width: 100%;
+    font-size: 14px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .result-info strong { color: var(--text); }
+  .result-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+  .result-actions button { width: 100%; }
+  .btn-add { background: var(--success); color: white; }
+  .btn-finish { background: var(--primary); color: white; }
+  .btn-download-single { background: var(--surface); color: var(--text); border: 1px solid var(--surface-light); }
+  
+  .gallery-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .gallery-info {
+    padding: 16px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-light);
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .gallery-info strong { color: var(--text); }
+  .gallery-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .page-item {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: grab;
+    transition: transform 0.15s, box-shadow 0.15s;
+    border: 2px solid transparent;
+  }
+  .page-item:active { cursor: grabbing; }
+  .page-item.sortable-ghost { opacity: 0.4; border-color: var(--primary); }
+  .page-item.sortable-chosen { box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3); }
+  .page-thumb {
+    width: 60px;
+    height: 80px;
+    border-radius: 6px;
+    object-fit: cover;
+    background: white;
+    flex-shrink: 0;
+  }
+  .page-info { flex: 1; min-width: 0; }
+  .page-number { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .page-meta { font-size: 12px; color: var(--text-dim); }
+  .page-actions { display: flex; flex-direction: column; gap: 6px; }
+  .page-btn {
+    background: var(--surface-light);
+    border: none;
+    color: var(--text);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-btn.danger { background: var(--danger); }
+  .gallery-footer {
+    background: var(--surface);
+    padding: 12px;
+    border-top: 1px solid var(--surface-light);
+    display: flex;
+    gap: 8px;
+  }
+  .gallery-footer button { flex: 1; padding: 14px; font-size: 15px; }
+  .btn-add-more { background: var(--surface-light); color: var(--text); }
+  .btn-generate { background: var(--primary); color: white; font-weight: 600; }
+  .gallery-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-dim);
+    gap: 16px;
+  }
+  .gallery-empty .icon { font-size: 48px; }
+  
+  .loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid var(--surface-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    color: white;
+    font-size: 15px;
+    text-align: center;
+    max-width: 280px;
+  }
+  .loading-progress {
+    width: 200px;
+    height: 4px;
+    background: var(--surface-light);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .loading-progress-bar {
+    height: 100%;
+    background: var(--primary);
+    width: 0%;
+    transition: width 0.3s;
+  }
+  
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--surface);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+    z-index: 2000;
+    border-left: 4px solid var(--primary);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.error { border-left-color: var(--danger); }
+  .toast.success { border-left-color: var(--success); }
+  .toast.warning { border-left-color: var(--warning); }
+  
+  .confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .confirm-overlay.active { display: flex; }
+  .confirm-box {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 24px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+  }
+  .confirm-box h3 { margin-bottom: 12px; font-size: 18px; }
+  .confirm-box p { color: var(--text-dim); margin-bottom: 20px; font-size: 14px; line-height: 1.5; }
+  .confirm-actions { display: flex; gap: 10px; }
+  .confirm-actions button { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; font-size: 14px; }
+  .confirm-cancel { background: var(--surface-light); color: var(--text); }
+  .confirm-ok { background: var(--danger); color: white; }
+</style>
+</head>
+<body>
+
+<div id="screen-home" class="screen active">
+  <div class="home">
+    <div class="logo">📄</div>
+    <h2>ScanLens</h2>
+    <p>Escanea documentos con corrección de perspectiva profesional</p>
+    
+    <!-- 🆕 SELECTOR DE CALIDAD -->
+    <div class="quality-selector">
+      <label>Calidad de procesamiento:</label>
+      <div class="quality-options">
+        <div class="quality-option" data-quality="fast" onclick="setQuality('fast')">
+          <span class="icon">⚡</span>
+          <div class="name">Rápido</div>
+          <div class="desc">1-2 seg</div>
+        </div>
+        <div class="quality-option active" data-quality="balanced" onclick="setQuality('balanced')">
+          <span class="icon">⚖️</span>
+          <div class="name">Equilibrado</div>
+          <div class="desc">3-5 seg</div>
+        </div>
+        <div class="quality-option" data-quality="high" onclick="setQuality('high')">
+          <span class="icon">🎯</span>
+          <div class="name">Alta</div>
+          <div class="desc">5-10 seg</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="capture-buttons">
+      <button class="btn-capture" onclick="captureFromCamera()">
+        <span class="icon">📷</span> Tomar Foto
+      </button>
+      <button class="btn-capture secondary" onclick="captureFromFile()">
+        <span class="icon">📁</span> Subir Archivo
+      </button>
+    </div>
+    <div id="cvStatusHome">Preparando motor de corrección...</div>
+  </div>
+</div>
+
+<div id="screen-editor" class="screen">
+  <div class="header">
+    <button class="btn-back" onclick="cancelEditor()">←</button>
+    <h1>Ajustar Esquinas</h1>
+  </div>
+  <div class="editor-container">
+    <div class="editor-hint">Arrastra los puntos a las esquinas del documento</div>
+    <div class="canvas-wrapper">
+      <canvas id="editorCanvas"></canvas>
+    </div>
+    <div class="editor-toolbar">
+      <button class="tool-btn" onclick="resetCorners()">🔄 Reset</button>
+      <button class="tool-btn primary" onclick="applyPerspective()" id="btnApply">
+        ✨ Aplicar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-result" class="screen">
+  <div class="header">
+    <button class="btn-back" onclick="backFromResult()">←</button>
+    <h1>Página Corregida</h1>
+    <span class="page-count" id="resultPageCount">1</span>
+  </div>
+  <div class="result-container">
+    <img id="resultImage" class="result-image" alt="Resultado">
+    <div class="result-info" id="resultInfo"></div>
+    <div class="result-actions">
+      <button class="tool-btn btn-add" onclick="addAnotherPage()">
+        📄 Agregar otra página
+      </button>
+      <button class="tool-btn btn-finish" onclick="finishDocument()">
+        ✅ Terminar documento
+      </button>
+      <button class="tool-btn btn-download-single" onclick="downloadSinglePage()">
+        💾 Descargar solo esta página
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="screen-gallery" class="screen">
+  <div class="header">
+    <button class="btn-back" onclick="backFromGallery()">←</button>
+    <h1>Mi Documento</h1>
+    <span class="page-count" id="galleryPageCount">0</span>
+  </div>
+  <div class="gallery-container">
+    <div class="gallery-info">
+      <strong>Arrastra</strong> para reordenar las páginas. El orden se mantendrá en el PDF final.
+    </div>
+    <div class="gallery-list" id="galleryList"></div>
+    <div class="gallery-footer">
+      <button class="tool-btn btn-add-more" onclick="addMorePages()">➕ Agregar</button>
+      <button class="tool-btn btn-generate" onclick="generatePDF()">📑 Generar PDF A4</button>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Procesando...</div>
+  <div class="loading-progress"><div class="loading-progress-bar" id="loadingBar"></div></div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<div id="confirmOverlay" class="confirm-overlay">
+  <div class="confirm-box">
+    <h3 id="confirmTitle">¿Confirmar?</h3>
+    <p id="confirmMessage">Esta acción no se puede deshacer.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancelar</button>
+      <button class="confirm-ok" id="confirmOkBtn">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="fileInput" accept="image/*" style="display:none">
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+/* =========================================================
+   CONFIGURACIÓN DE CALIDAD
+   ========================================================= */
+const QUALITY_PRESETS = {
+  fast: { maxDim: 1000, jpegQuality: 0.80, label: 'Rápido (1000px, 80%)' },
+  balanced: { maxDim: 1200, jpegQuality: 0.90, label: 'Equilibrado (1200px, 90%)' },
+  high: { maxDim: 2000, jpegQuality: 0.92, label: 'Alta calidad (2000px, 92%)' }
+};
+
+let currentQuality = 'balanced';
+
+function setQuality(level) {
+  currentQuality = level;
+  document.querySelectorAll('.quality-option').forEach(el => {
+    el.classList.toggle('active', el.dataset.quality === level);
+  });
+  localStorage.setItem('scanlens_quality', level);
+  showToast(`Calidad: ${QUALITY_PRESETS[level].label}`);
+}
+
+// Cargar preferencia guardada
+const savedQuality = localStorage.getItem('scanlens_quality');
+if (savedQuality && QUALITY_PRESETS[savedQuality]) {
+  setQuality(savedQuality);
+}
+
+/* =========================================================
+   OPENCV.JS
+   ========================================================= */
+let cvReady = false;
+let cvLoading = false;
+let cvLoadPromise = null;
+
+function loadOpenCV() {
+  if (cvLoadPromise) return cvLoadPromise;
+  cvLoadPromise = new Promise((resolve, reject) => {
+    if (cvReady) return resolve();
+    if (cvLoading) {
+      const check = setInterval(() => {
+        if (cvReady) { clearInterval(check); resolve(); }
+      }, 100);
+      return;
+    }
+    cvLoading = true;
+    const script = document.createElement('script');
+    script.src = 'https://docs.opencv.org/4.8.0/opencv.js';
+    script.async = true;
+    script.onload = () => {
+      if (window.cv && window.cv.Mat) {
+        const originalCb = window.cv['onRuntimeInitialized'];
+        window.cv['onRuntimeInitialized'] = () => {
+          cvReady = true;
+          updateCvStatus();
+          if (originalCb) originalCb();
+          resolve();
+        };
+        if (window.cv.getBuildInformation) {
+          try {
+            window.cv.getBuildInformation();
+            cvReady = true;
+            updateCvStatus();
+            resolve();
+          } catch(e) {}
+        }
+      }
+    };
+    script.onerror = () => {
+      cvLoading = false;
+      cvLoadPromise = null;
+      reject(new Error('No se pudo cargar OpenCV.js'));
+    };
+    document.head.appendChild(script);
+  });
+  return cvLoadPromise;
+}
+
+function updateCvStatus() {
+  const el = document.getElementById('cvStatusHome');
+  if (!el) return;
+  if (cvReady) {
+    el.innerHTML = '✅ Motor de corrección listo';
+    el.style.color = 'var(--success)';
+  } else if (cvLoading) {
+    el.innerHTML = '⏳ Descargando motor de corrección...';
+    el.style.color = 'var(--warning)';
+  } else {
+    el.innerHTML = '⚙️ Preparando motor de corrección...';
+    el.style.color = 'var(--text-dim)';
+  }
+}
+
+setTimeout(() => {
+  loadOpenCV().catch(err => {
+    console.warn('Precarga OpenCV falló:', err);
+  });
+}, 500);
+
+/* =========================================================
+   ESTADO GLOBAL
+   ========================================================= */
+const MAX_PAGES = 50;
+
+const state = {
+  originalImage: null,
+  corners: [{x:0,y:0},{x:0,y:0},{x:0,y:0},{x:0,y:0}],
+  displayScale: 1,
+  draggingCorner: -1,
+  currentPageBlob: null,
+  currentPageDims: { w: 0, h: 0 },
+  pages: [],
+  editingPageId: null
+};
+
+const canvas = document.getElementById('editorCanvas');
+const ctx = canvas.getContext('2d');
+let sortableInstance = null;
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function goHome() { showScreen('screen-home'); updateCvStatus(); }
+function cancelEditor() {
+  if (state.pages.length > 0) {
+    showScreen('screen-gallery');
+    renderGallery();
+  } else {
+    goHome();
+  }
+}
+function backFromResult() {
+  showScreen('screen-editor');
+  drawEditor();
+}
+function backFromGallery() {
+  if (state.pages.length > 0) {
+    showConfirm(
+      '¿Descartar documento?',
+      `Tienes ${state.pages.length} página(s). Si sales, se perderán.`,
+      'Descartar',
+      () => { clearAllPages(); goHome(); }
+    );
+  } else {
+    goHome();
+  }
+}
+
+/* =========================================================
+   CAPTURA
+   ========================================================= */
+function captureFromCamera() { document.getElementById('cameraInput').click(); }
+function captureFromFile() { document.getElementById('fileInput').click(); }
+
+document.getElementById('cameraInput').addEventListener('change', handleFileSelect);
+document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (state.pages.length >= MAX_PAGES) {
+    showToast(`Límite de ${MAX_PAGES} páginas alcanzado`, 'warning');
+    e.target.value = '';
+    return;
+  }
+  showLoading('Cargando imagen...');
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = new Image();
+    img.onload = () => {
+      state.originalImage = img;
+      state.editingPageId = null;
+      initCorners();
+      hideLoading();
+      showScreen('screen-editor');
+      drawEditor();
+    };
+    img.onerror = () => { hideLoading(); showToast('Error al cargar imagen', 'error'); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+/* =========================================================
+   ESQUINAS
+   ========================================================= */
+function initCorners() {
+  const img = state.originalImage;
+  const margin = Math.min(img.width, img.height) * 0.05;
+  state.corners = [
+    { x: margin, y: margin },
+    { x: img.width - margin, y: margin },
+    { x: img.width - margin, y: img.height - margin },
+    { x: margin, y: img.height - margin }
+  ];
+}
+function resetCorners() {
+  initCorners();
+  drawEditor();
+  showToast('Esquinas reiniciadas');
+}
+
+/* =========================================================
+   DIBUJO DEL EDITOR
+   ========================================================= */
+function drawEditor() {
+  if (!state.originalImage) return;
+  const img = state.originalImage;
+  const wrapper = canvas.parentElement;
+  const maxW = wrapper.clientWidth;
+  const maxH = wrapper.clientHeight;
+  const scale = Math.min(maxW / img.width, maxH / img.height);
+  state.displayScale = scale;
+  canvas.width = img.width * scale;
+  canvas.height = img.height * scale;
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  
+  ctx.fillStyle = 'rgba(37, 99, 235, 0.15)';
+  ctx.beginPath();
+  state.corners.forEach((c, i) => {
+    const x = c.x * scale, y = c.y * scale;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#2563eb';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  
+  state.corners.forEach((c, i) => {
+    const x = c.x * scale, y = c.y * scale;
+    const r = state.draggingCorner === i ? 18 : 14;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = state.draggingCorner === i ? '#f59e0b' : '#2563eb';
+    ctx.fill();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(i + 1, x, y);
+  });
+}
+
+/* =========================================================
+   DRAG DE ESQUINAS
+   ========================================================= */
+function getPointerPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  return { x: touch.clientX - rect.left, y: touch.clientY - rect.top };
+}
+function findCornerAt(pos) {
+  const threshold = 30;
+  for (let i = 0; i < state.corners.length; i++) {
+    const c = state.corners[i];
+    const cx = c.x * state.displayScale;
+    const cy = c.y * state.displayScale;
+    if (Math.hypot(pos.x - cx, pos.y - cy) <= threshold) return i;
+  }
+  return -1;
+}
+function onPointerDown(e) {
+  e.preventDefault();
+  state.draggingCorner = findCornerAt(getPointerPos(e));
+  drawEditor();
+}
+function onPointerMove(e) {
+  if (state.draggingCorner < 0) return;
+  e.preventDefault();
+  const pos = getPointerPos(e);
+  const img = state.originalImage;
+  state.corners[state.draggingCorner] = {
+    x: Math.max(0, Math.min(img.width, pos.x / state.displayScale)),
+    y: Math.max(0, Math.min(img.height, pos.y / state.displayScale))
+  };
+  drawEditor();
+}
+function onPointerUp() {
+  state.draggingCorner = -1;
+  drawEditor();
+}
+canvas.addEventListener('mousedown', onPointerDown);
+canvas.addEventListener('mousemove', onPointerMove);
+canvas.addEventListener('mouseup', onPointerUp);
+canvas.addEventListener('mouseleave', onPointerUp);
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+canvas.addEventListener('touchmove', onPointerMove, { passive: false });
+canvas.addEventListener('touchend', onPointerUp);
+
+/* =========================================================
+   CORRECCIÓN DE PERSPECTIVA CON CALIDAD AJUSTABLE
+   ========================================================= */
+async function applyPerspective() {
+  const t0 = performance.now();
+  const quality = QUALITY_PRESETS[currentQuality];
+  
+  try {
+    if (!cvReady) {
+      showLoading('Cargando motor de corrección...', 10);
+      await loadOpenCV();
+    }
+    showLoading(`Preparando imagen (${quality.label})...`, 30);
+    await new Promise(r => setTimeout(r, 30));
+    
+    const img = state.originalImage;
+    const corners = state.corners;
+    
+    const origW = img.width, origH = img.height;
+    const maxDim = Math.max(origW, origH);
+    let processScale = 1;
+    let srcForProcess = img;
+    
+    if (maxDim > quality.maxDim) {
+      processScale = quality.maxDim / maxDim;
+      const newW = Math.round(origW * processScale);
+      const newH = Math.round(origH * processScale);
+      const resizeCanvas = document.createElement('canvas');
+      resizeCanvas.width = newW;
+      resizeCanvas.height = newH;
+      const rctx = resizeCanvas.getContext('2d');
+      rctx.drawImage(img, 0, 0, newW, newH);
+      srcForProcess = resizeCanvas;
+    }
+    
+    showLoading('Corrigiendo perspectiva...', 50);
+    await new Promise(r => setTimeout(r, 30));
+    
+    const scaledCorners = corners.map(c => ({
+      x: c.x * processScale,
+      y: c.y * processScale
+    }));
+    
+    const widthTop = Math.hypot(scaledCorners[1].x - scaledCorners[0].x, scaledCorners[1].y - scaledCorners[0].y);
+    const widthBottom = Math.hypot(scaledCorners[2].x - scaledCorners[3].x, scaledCorners[2].y - scaledCorners[3].y);
+    const heightLeft = Math.hypot(scaledCorners[3].x - scaledCorners[0].x, scaledCorners[3].y - scaledCorners[0].y);
+    const heightRight = Math.hypot(scaledCorners[2].x - scaledCorners[1].x, scaledCorners[2].y - scaledCorners[1].y);
+    
+    const dstWidth = Math.round(Math.max(widthTop, widthBottom));
+    const dstHeight = Math.round(Math.max(heightLeft, heightRight));
+    
+    const srcMat = cv.imread(srcForProcess);
+    const dstMat = new cv.Mat(dstHeight, dstWidth, cv.CV_8UC4);
+    
+    const srcTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
+      scaledCorners[0].x, scaledCorners[0].y,
+      scaledCorners[1].x, scaledCorners[1].y,
+      scaledCorners[2].x, scaledCorners[2].y,
+      scaledCorners[3].x, scaledCorners[3].y
+    ]);
+    const dstTri = cv.matFromArray(4, 1, cv.CV_32FC2, [
+      0, 0, dstWidth, 0, dstWidth, dstHeight, 0, dstHeight
+    ]);
+    
+    const M = cv.getPerspectiveTransform(srcTri, dstTri);
+    cv.warpPerspective(srcMat, dstMat, M, new cv.Size(dstWidth, dstHeight),
+      cv.INTER_LINEAR, cv.BORDER_CONSTANT, new cv.Scalar());
+    
+    showLoading('Generando imagen...', 85);
+    await new Promise(r => setTimeout(r, 30));
+    
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = dstWidth;
+    tempCanvas.height = dstHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    const imageData = tempCtx.createImageData(dstWidth, dstHeight);
+    imageData.data.set(dstMat.data);
+    tempCtx.putImageData(imageData, 0, 0);
+    
+    tempCanvas.toBlob((blob) => {
+      state.currentPageBlob = blob;
+      state.currentPageDims = { w: dstWidth, h: dstHeight };
+      
+      const thumbCanvas = document.createElement('canvas');
+      const thumbSize = 150;
+      const ratio = Math.min(thumbSize / dstWidth, thumbSize / dstHeight);
+      thumbCanvas.width = dstWidth * ratio;
+      thumbCanvas.height = dstHeight * ratio;
+      thumbCanvas.getContext('2d').drawImage(tempCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+      const thumbnailUrl = thumbCanvas.toDataURL('image/jpeg', 0.6);
+      
+      if (state.editingPageId !== null) {
+        const idx = state.pages.findIndex(p => p.id === state.editingPageId);
+        if (idx >= 0) {
+          URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
+          state.pages[idx] = { id: state.editingPageId, blob, width: dstWidth, height: dstHeight, thumbnailUrl };
+        }
+        state.editingPageId = null;
+      } else {
+        state.currentPageData = { id: Date.now() + Math.random(), blob, width: dstWidth, height: dstHeight, thumbnailUrl };
+      }
+      
+      const url = URL.createObjectURL(blob);
+      document.getElementById('resultImage').src = url;
+      document.getElementById('resultPageCount').textContent = state.pages.length + 1;
+      
+      const resultKB = Math.round(blob.size / 1024);
+      const elapsed = ((performance.now() - t0) / 1000).toFixed(1);
+      document.getElementById('resultInfo').innerHTML = `
+        <div><strong>Dimensiones:</strong> ${dstWidth} × ${dstHeight} px</div>
+        <div><strong>Tamaño:</strong> ${resultKB} KB</div>
+        <div><strong>Tiempo:</strong> ${elapsed}s</div>
+        <div><strong>Calidad:</strong> ${quality.label}</div>
+        <div><strong>Páginas:</strong> ${state.pages.length + 1}</div>
+      `;
+      
+      srcMat.delete(); dstMat.delete(); srcTri.delete(); dstTri.delete(); M.delete();
+      
+      hideLoading();
+      showScreen('screen-result');
+      showToast(`✅ Listo en ${elapsed}s`, 'success');
+    }, 'image/jpeg', quality.jpegQuality);
+    
+  } catch (err) {
+    console.error(err);
+    hideLoading();
+    showToast('Error: ' + err.message, 'error');
+  }
+}
+
+/* =========================================================
+   ACCIONES DESDE RESULTADO
+   ========================================================= */
+function addAnotherPage() {
+  if (state.currentPageData) {
+    state.pages.push(state.currentPageData);
+    state.currentPageData = null;
+  }
+  if (state.pages.length >= MAX_PAGES) {
+    showToast(`Límite de ${MAX_PAGES} páginas alcanzado`, 'warning');
+    showScreen('screen-gallery');
+    renderGallery();
+    return;
+  }
+  showToast(`Página guardada (${state.pages.length})`, 'success');
+  goHome();
+}
+function finishDocument() {
+  if (state.currentPageData) {
+    state.pages.push(state.currentPageData);
+    state.currentPageData = null;
+  }
+  showScreen('screen-gallery');
+  renderGallery();
+}
+function downloadSinglePage() {
+  if (!state.currentPageBlob) return;
+  const url = URL.createObjectURL(state.currentPageBlob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pagina_${Date.now()}.jpg`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Página descargada', 'success');
+}
+
+/* =========================================================
+   GALERÍA
+   ========================================================= */
+function renderGallery() {
+  const list = document.getElementById('galleryList');
+  document.getElementById('galleryPageCount').textContent = state.pages.length;
+  if (state.pages.length === 0) {
+    list.innerHTML = `
+      <div class="gallery-empty">
+        <div class="icon">📭</div>
+        <div><strong>No hay páginas</strong></div>
+        <div style="font-size:13px">Toca "Agregar" para capturar tu primera página</div>
+      </div>
+    `;
+    return;
+  }
+  list.innerHTML = state.pages.map((page, idx) => `
+    <div class="page-item" data-id="${page.id}">
+      <img src="${page.thumbnailUrl}" class="page-thumb" alt="Página ${idx + 1}">
+      <div class="page-info">
+        <div class="page-number">Página ${idx + 1}</div>
+        <div class="page-meta">${page.width} × ${page.height} px · ${Math.round(page.blob.size / 1024)} KB</div>
+      </div>
+      <div class="page-actions">
+        <button class="page-btn" onclick="editPage('${page.id}')" title="Editar">✏️</button>
+        <button class="page-btn danger" onclick="deletePage('${page.id}')" title="Eliminar">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+  
+  if (!sortableInstance) {
+    sortableInstance = Sortable.create(list, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      handle: '.page-item',
+      onEnd: (evt) => {
+        const { oldIndex, newIndex } = evt;
+        if (oldIndex === newIndex) return;
+        const [moved] = state.pages.splice(oldIndex, 1);
+        state.pages.splice(newIndex, 0, moved);
+        renderGallery();
+        showToast('Orden actualizado');
+      }
+    });
+  }
+}
+function addMorePages() { goHome(); }
+function editPage(id) {
+  const page = state.pages.find(p => p.id == id);
+  if (!page) return;
+  showLoading('Cargando página...');
+  const url = URL.createObjectURL(page.blob);
+  const img = new Image();
+  img.onload = () => {
+    state.originalImage = img;
+    state.editingPageId = page.id;
+    state.corners = [
+      { x: 0, y: 0 },
+      { x: img.width, y: 0 },
+      { x: img.width, y: img.height },
+      { x: 0, y: img.height }
+    ];
+    hideLoading();
+    showScreen('screen-editor');
+    drawEditor();
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = () => { hideLoading(); showToast('Error al cargar', 'error'); };
+  img.src = url;
+}
+function deletePage(id) {
+  showConfirm(
+    '¿Eliminar página?',
+    'Esta página se eliminará del documento.',
+    'Eliminar',
+    () => {
+      const idx = state.pages.findIndex(p => p.id == id);
+      if (idx >= 0) {
+        URL.revokeObjectURL(state.pages[idx].thumbnailUrl);
+        state.pages.splice(idx, 1);
+        renderGallery();
+        showToast('Página eliminada');
+      }
+    }
+  );
+}
+function clearAllPages() {
+  state.pages.forEach(p => URL.revokeObjectURL(p.thumbnailUrl));
+  state.pages = [];
+  state.currentPageData = null;
+  state.editingPageId = null;
+}
+function generatePDF() {
+  if (state.pages.length === 0) {
+    showToast('Agrega al menos una página', 'warning');
+    return;
+  }
+  showToast('🚧 Generación de PDF en Fase 5', 'warning');
+}
+
+/* =========================================================
+   CONFIRM DIALOG
+   ========================================================= */
+let confirmCallback = null;
+function showConfirm(title, message, okText, callback) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMessage').textContent = message;
+  document.getElementById('confirmOkBtn').textContent = okText;
+  confirmCallback = callback;
+  document.getElementById('confirmOverlay').classList.add('active');
+}
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('active');
+  confirmCallback = null;
+}
+document.getElementById('confirmOkBtn').addEventListener('click', () => {
+  if (confirmCallback) confirmCallback();
+  closeConfirm();
+});
+
+/* =========================================================
+   UTILIDADES UI
+   ========================================================= */
+function showLoading(text, progress) {
+  document.getElementById('loadingText').textContent = text || 'Procesando...';
+  if (progress !== undefined) {
+    document.getElementById('loadingBar').style.width = progress + '%';
+  }
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() {
+  document.getElementById('loadingBar').style.width = '0%';
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+window.addEventListener('resize', () => {
+  if (document.getElementById('screen-editor').classList.contains('active')) {
+    drawEditor();
+  }
+});
+</script>
+
+</body>
+</html>
